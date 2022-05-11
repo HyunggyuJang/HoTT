@@ -147,6 +147,15 @@ Section Book_1_5.
    | inr b => g b
    end.
 
+  Definition Book_1_5_ind' (A B : Type) (C : Book_1_5_sum A B -> Type) (f : forall a, C (inl a))
+   (g : forall b, C (inr b)) : forall x : Book_1_5_sum A B, C x.
+  Proof.
+    intro x. unfold Book_1_5_sum in *. destruct x. destruct proj1.
+    - apply (f proj2).          (* proj1 = [true] *)
+    - apply (g proj2).          (* proj1 = [false] *)
+  Defined.
+
+
   Theorem inl_red {A B : Type} {C : Book_1_5_sum A B -> Type} f g { a : A }
   : Book_1_5_ind A B C f g (inl a) = f a.
   Proof. reflexivity. Defined.
@@ -159,7 +168,28 @@ End Book_1_5.
 (* ================================================== ex:prod-via-bool *)
 (** Exercise 1.6 *)
 
+Section Book_1_6.
+  Variable A B : Type.
+  Definition Book_1_6_prod (A B : Type) := forall x : Bool, if x then A else B.
+  Declare Scope prod_scope.
+  Open Scope prod_scope.
+  Local Notation "A '×' B" := (Book_1_6_prod A B) : prod_scope.
 
+  Definition Book_1_6_pair (a : A) (b : B) : A × B :=
+    fun x : Bool =>
+      match x with
+        | true => a
+        | false => b
+      end.
+  Local Notation "( a , b )" := (Book_1_6_pair a b) : prod_scope.
+
+  Definition Book_1_6_ind (C : A × B -> Type) (f : forall a b, C (a,b))
+    : forall x : A × B, C (x).
+    intro x. unfold Book_1_6_pair in *. unfold Book_1_6_prod in *.
+    (* apply (f (x true) (x false)). *)
+    Admitted.
+  Close Scope prod_scope.
+End Book_1_6.
 
 (* ================================================== ex:pm-to-ml *)
 (** Exercise 1.7 *)
@@ -247,6 +277,13 @@ Section Book_1_12.
     - exact (na a).
     - exact (nb b).
   Qed.
+
+  Theorem Book_1_12_part4: forall A B, ~A * ~B -> ~(A + B).
+  Proof.
+    intros A B [na nb] [a | b].
+    - exact (na a).
+    - exact (nb b).
+  Qed.
 End Book_1_12.
 
 (* ================================================== ex:not-not-lem *)
@@ -270,7 +307,12 @@ End Book_1_13.
 (* ================================================== ex:without-K *)
 (** Exercise 1.14 *)
 
-
+Section Book_1_14.
+  (* Definition Book_1_14 (A : Type) : forall (x : A) (p : x = x), p = 1 := *)
+  (*   fun x => paths_ind' (fun _ _ p => p = 1) (fun _ => 1) x x. *)
+  (* The term "1" has type "y = y" while it is expected to have type "y = y0"
+     (cannot unify "y" and "y0"). *)
+End Book_1_14.
 
 (* ================================================== ex:subtFromPathInd *)
 (** Exercise 1.15 *)
