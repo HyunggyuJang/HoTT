@@ -329,6 +329,24 @@ End Book_1_15.
 (* ================================================== ex:add-nat-commutative *)
 (** Exercise 1.16 *)
 
+Section Book_1_16.
+  Lemma add_j_0_eq_j: forall j : nat, add j 0 = j.
+  Proof.
+    induction j; try reflexivity.
+    unfold add in *. simpl. rewrite -> IHj. reflexivity.
+  Qed.
+  Lemma add_i_S_j_eq_S_add_i_j: forall i j : nat, add i j.+1 = (add i j).+1.
+  Proof. induction i; try reflexivity.
+    intro j; unfold add in *; simpl; rewrite IHi; reflexivity.
+  Qed.
+  Theorem Book_1_16 : forall i j : nat, add i j = add j i.
+  Proof.
+    induction i.
+    - intro j. rewrite (add_j_0_eq_j _). reflexivity.
+    - intro j. rewrite (add_i_S_j_eq_S_add_i_j _ _). rewrite <- (IHi _).
+      reflexivity.
+  Qed.
+End Book_1_16.
 
 
 (* ================================================== ex:basics:concat *)
