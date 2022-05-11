@@ -312,6 +312,8 @@ Section Book_1_14.
   (*   fun x => paths_ind' (fun _ _ p => p = 1) (fun _ => 1) x x. *)
   (* The term "1" has type "y = y" while it is expected to have type "y = y0"
      (cannot unify "y" and "y0"). *)
+  (* Path induction only allows for the function definition where at least one
+     of its ends is unfixed. *)
 End Book_1_14.
 
 (* ================================================== ex:subtFromPathInd *)
