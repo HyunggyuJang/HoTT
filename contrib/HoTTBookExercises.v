@@ -319,7 +319,12 @@ End Book_1_14.
 (* ================================================== ex:subtFromPathInd *)
 (** Exercise 1.15 *)
 
-(* concat_A1p? *)
+Section Book_1_15.
+  Variable A : Type.
+  Variable C : A -> Type.
+  Definition Book_1_15 : forall (x y : A) (p : x = y), (C x) -> (C y)
+        :=  fun x y p cx => transport C p cx.
+End Book_1_15.
 
 (* ================================================== ex:add-nat-commutative *)
 (** Exercise 1.16 *)
