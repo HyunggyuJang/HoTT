@@ -278,7 +278,7 @@ Section Book_1_12.
     - exact (nb b).
   Qed.
 
-  Theorem Book_1_12_part4: forall A B, ~A * ~B -> ~(A + B).
+  Theorem Book_1_12_part4 : forall A B, ~A * ~B -> ~(A + B).
   Proof.
     intros A B [na nb] [a | b].
     - exact (na a).
@@ -301,6 +301,17 @@ Section Book_1_13.
   Proof.
     intros P f. apply Book_1_13_aux in f. destruct f as [np nnp].
     exact (nnp np).
+  Qed.
+
+  Theorem dobule_neg_equiv_excluded_middle : (forall P, P + ~P) <-> (forall P, ~~P -> P).
+  Proof.
+    split.
+    - intros excluded_middle P. destruct (excluded_middle P) as [p | np];
+        intro nnp.
+      + exact p.
+      + contradiction.
+    - intros doubleNeg P.
+      apply doubleNeg, Book_1_13.
   Qed.
 End Book_1_13.
 
@@ -346,6 +357,30 @@ Section Book_1_16.
     - intro j. rewrite (add_i_S_j_eq_S_add_i_j _ _). rewrite <- (IHi _).
       reflexivity.
   Qed.
+(*   Check (fun j : nat => *)
+(*            internal_paths_rew_r nat (add j 0) j (fun n : nat => add 0 j = n)). *)
+
+(*   Fixpoint Book_1_16' (i j : nat) : add i j = add j i := *)
+(*     match i with *)
+(*       | O => let fix comm0 (j : nat) := *)
+(*                 match j with *)
+(*                   | O => 1 *)
+(*                   (* Have to return [add 0 k.+1 = add k.+1 0] *) *)
+(*                   (* We have [add 0 k = add k 0] by recursion *) *)
+(*                   (* and [add k.+1 0 = (add k 0).+1] by judgemental equality. *) *)
+(*                   (* Also note that [add 0 k = k] by judgemental equality. *) *)
+(*                   (* Thus, [add 0 k.+1 = k.+1 = (add 0 k).+1 = (add k 0).+1 = add k.+1 0] *) *)
+(*                   | S k => *)
+(*   let S_add_0_k_eq_S_add_k_0 : (add 0 k).+1 = (add k 0).+1 := *)
+(*       transport (fun n => (add 0 k).+1 = n.+1) (comm0 k) 1 in *)
+(*   transport (fun n => (add 0 k).+1 = n) 1 S_add_0_k_eq_S_add_k_0 *)
+(*                 end *)
+(*             in comm0 j *)
+(*       | S k => (* Have to show [add k.+1 j = add j k.+1] *) *)
+(* (* Note that [add k.+1 j = (add k j).+1] *) *)
+(* (* If we use recursion, we'd have [(add k j).+1 = (add j k).+1] *) *)
+(* (* We have to show [(add j k).+1 = add j k.+1], which isn't obvious *) *)
+    end.
 End Book_1_16.
 
 
