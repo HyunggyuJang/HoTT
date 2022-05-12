@@ -313,6 +313,17 @@ Section Book_1_13.
     - intros doubleNeg P.
       apply doubleNeg, Book_1_13.
   Qed.
+  Theorem Book_1_13_extra: (forall A B, ~(A * B) -> ~A + ~B) <-> (forall P, ~P + ~~P).
+  Proof.
+    split.
+    - intros demorgan P. apply (demorgan P (~P)).
+      intros [p np]; exact (np p).
+    - intros weak_excluded_middle A B not_A_and_B.
+      destruct (weak_excluded_middle A) as [na | nna];
+        destruct (weak_excluded_middle B) as [nb | nnb]; auto.
+      assert (~~B -> ~A) as not_not_b_to_not_a by auto.
+      contradiction (nna (not_not_b_to_not_a nnb)).
+  Qed.
 End Book_1_13.
 
 (* ================================================== ex:without-K *)
