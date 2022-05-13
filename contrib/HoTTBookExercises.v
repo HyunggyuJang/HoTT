@@ -303,6 +303,12 @@ Section Book_1_13.
     exact (nnp np).
   Qed.
 
+  Theorem Book_1_13' : forall P, ~~(P + ~P).
+  Proof.
+    intros P f.
+    apply f. apply inr. intro p. apply f. assumption.
+  Qed.
+
   Theorem dobule_neg_equiv_excluded_middle : (forall P, P + ~P) <-> (forall P, ~~P -> P).
   Proof.
     split.
