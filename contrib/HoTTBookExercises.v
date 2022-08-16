@@ -225,8 +225,17 @@ Example exp_example: exp 2 10 = 1024. Proof. reflexivity. Defined.
 (* ================================================== ex:fin *)
 (** Exercise 1.9 *)
 
+Fixpoint fmax (n : nat): Fin (n .+1) :=
+  match n with
+    | O => fin_zero
+    | S m => fsucc (fmax m)
+  end.
 
-
+Definition fmax': forall n, Fin (n .+1).
+  intro n. induction n.
+  - apply inr. exact tt.
+  - apply inl. assumption.
+Defined.
 (* ================================================== ex:ackermann *)
 (** Exercise 1.10 *)
 
@@ -303,10 +312,10 @@ Section Book_1_13.
     exact (nnp np).
   Qed.
 
-  Theorem Book_1_13' : forall P, ~~(P + ~P).
+  Theorem Book_1_13_direct : forall P, ~~(P + ~P).
   Proof.
     intros P f.
-    apply f. apply inr. intro p. apply f. assumption.
+    apply f. apply inr. intro p. apply f. exact (inl p).
   Qed.
 
   Theorem dobule_neg_equiv_excluded_middle : (forall P, P + ~P) <-> (forall P, ~~P -> P).
@@ -336,10 +345,8 @@ End Book_1_13.
 (** Exercise 1.14 *)
 
 Section Book_1_14.
-  (* Definition Book_1_14 (A : Type) : forall (x : A) (p : x = x), p = 1 := *)
-  (*   fun x => paths_ind' (fun _ _ p => p = 1) (fun _ => 1) x x. *)
-  (* The term "1" has type "y = y" while it is expected to have type "y = y0"
-     (cannot unify "y" and "y0"). *)
+  Definition Book_1_14 (A : Type) : forall (x : A) (p : x = x), p = 1 :=
+    fun x => paths_ind' (fun _ _ p => p = 1) (fun _ => 1) x x.
   (* Path induction only allows for the function definition where at least one
      of its ends is unfixed. *)
 End Book_1_14.
@@ -397,7 +404,7 @@ Section Book_1_16.
 (* (* Note that [add k.+1 j = (add k j).+1] *) *)
 (* (* If we use recursion, we'd have [(add k j).+1 = (add j k).+1] *) *)
 (* (* We have to show [(add j k).+1 = add j k.+1], which isn't obvious *) *)
-    end.
+(*     end. *)
 End Book_1_16.
 
 
@@ -433,6 +440,13 @@ Defined.
 Local Notation "p *1 q" := (Book_2_1_concatenation1 p q) (at level 10).
 Local Notation "p *2 q" := (Book_2_1_concatenation2 p q) (at level 10).
 Local Notation "p *3 q" := (Book_2_1_concatenation3 p q) (at level 10).
+
+Definition Book_2_1_ProofStyle:
+    forall {A : Type} (a : A) (p : a = a), p *1 p = p.
+Proof.
+  intros A a p.
+  (* induction p. *)
+Abort.
 
 Section Book_2_1_Proofs_Are_Equal.
   Context {A : Type} {x y z : A}.

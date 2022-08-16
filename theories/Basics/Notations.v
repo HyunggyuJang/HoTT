@@ -121,6 +121,8 @@ Reserved Notation "p @ q" (at level 20).
 Reserved Notation "p # x" (right associativity, at level 65).
 Reserved Notation "p # x" (right associativity, at level 65).
 Reserved Notation "p @@ q" (at level 20).
+Reserved Notation "p @l q" (at level 20).
+Reserved Notation "p @r q" (at level 20).
 Reserved Notation "p @' q" (at level 21, left associativity,
   format "'[v' p '/' '@''  q ']'").
 Reserved Notation "f == g" (at level 70, no associativity).

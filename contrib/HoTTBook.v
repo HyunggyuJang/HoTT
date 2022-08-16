@@ -73,27 +73,33 @@ From HoTT.Classes Require
 (* ================================================== lem:opp *)
 (** Lemma 2.1.1 *)
 
-Definition Book_2_1_1 := @HoTT.Basics.Overture.inverse.
+Definition Book_2_1_1 := @inverse.
 
 (* ================================================== lem:concat *)
 (** Lemma 2.1.2 *)
 
-Definition Book_2_1_2 := @HoTT.Basics.Overture.transitive_paths.
+Definition Book_2_1_2 := @transitive_paths.
 
 (* ================================================== thm:omg *)
 (** Lemma 2.1.4 *)
 
-Definition Book_2_1_4_item_i := @HoTT.Basics.PathGroupoids.concat_p1.
-Definition Book_2_1_4_item_i' := @HoTT.Basics.PathGroupoids.concat_1p.
-Definition Book_2_1_4_item_ii := @HoTT.Basics.PathGroupoids.concat_Vp.
-Definition Book_2_1_4_item_ii' := @HoTT.Basics.PathGroupoids.concat_pV.
-Definition Book_2_1_4_item_iii := @HoTT.Basics.PathGroupoids.inv_V.
-Definition Book_2_1_4_item_iv := @HoTT.Basics.PathGroupoids.concat_p_pp.
+Definition Book_2_1_4_item_i := @concat_p1.
+Definition Book_2_1_4_item_i' := @concat_1p.
+Definition Book_2_1_4_item_ii := @concat_Vp.
+Definition Book_2_1_4_item_ii' := @concat_pV.
+Definition Book_2_1_4_item_iii := @inv_V.
+Definition Book_2_1_4_item_iv := @concat_p_pp.
 
 (* ================================================== thm:EckmannHilton *)
 (** Theorem 2.1.6 *)
 
-Definition Book_2_1_6 := @HoTT.Basics.PathGroupoids.eckmann_hilton.
+Section Eckmann.
+  Local Open Scope path_scope.
+  Notation "a l@ b" := (whisker_l a b)%path : path_scope.
+  Local Notation "a @r b" := (whisker_r a b)%path : path_scope.
+  Definition Book_2_1_6 := @HoTT.Basics.PathGroupoids.eckmann_hilton.
+End Eckmann.
+
 
 (* ================================================== def:pointedtype *)
 (** Definition 2.1.7 *)
@@ -188,6 +194,8 @@ Definition Book_2_4_4 := @HoTT.Basics.PathGroupoids.concat_A1p.
     adjoint equivalence extending the quasi-inverse *)
 
 Definition Book_2_4_6 := @HoTT.Basics.Equivalences.isequiv_adjointify.
+
+
 
 (* ================================================== eg:idequiv *)
 (** Example 2.4.7 *)
