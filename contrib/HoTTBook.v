@@ -86,8 +86,65 @@ Definition Book_2_1_4_item_ii' := @HoTT.Basics.PathGroupoids.concat_pV.
 Definition Book_2_1_4_item_iii := @HoTT.Basics.PathGroupoids.inv_V.
 Definition Book_2_1_4_item_iv := @HoTT.Basics.PathGroupoids.concat_p_pp.
 
+Lemma ap_ap011 {A B C} {f : A -> B -> C} {x x' y y'} {p : x = x'} {q : y = y'}:
+  ap (fun z => f (fst z) (snd z)) (path_prod (x, y) (x', y') p q) = ap011 f p q.
+Proof.
+  destruct p, q.
+  reflexivity.
+Qed.
+
 (* ================================================== thm:EckmannHilton *)
 (** Theorem 2.1.6 *)
+Section Eckmann.
+  Local Open Scope path_scope.
+  Definition whisker_r {A : Type} {a b c : A} {p q : a = b} (α : p = q) (r : b = c) : p @ r = q @ r.
+  Proof.
+    elim r.
+    repeat rewrite (concat_p1 _).
+    assumption.
+  Defined.
+
+  Definition whisker_l {A : Type} {a b c : A} {r s : b = c} (q : a = b) (ϐ : r = s) : q @ r = q @ s.
+  Proof.
+    destruct q.
+    repeat rewrite (concat_1p _); assumption.
+  Defined.
+  Notation "a @^l b" := (whisker_l a b)%path : path_scope.
+  Notation "a @^r b" := (whisker_r a b)%path : path_scope.
+  Definition star {A : Type} {a b c : A}
+    {p q : a = b} {r s : b = c}
+    (α : p = q) (ϐ : r = s):
+    p @ r = q @ s := (α @^r r) @ (q @^l ϐ).
+  Local Notation "a ⋆ b" := (star a b) (at level 20).
+  Lemma star_concat {A : Type} {a : A} (α ϐ : idpath a = idpath a) :
+    α ⋆ ϐ = α @ ϐ.
+  Proof.
+    unfold star, "@^l", "@^r". reflexivity.
+  Qed.
+  Definition star' {A : Type} {a b c : A} {p q : a = b} {r s : b = c}
+    (α : p = q) (ϐ : r = s): p @ r = q @ s
+    := (p @^l ϐ) @ (α @^r s).
+  Local Notation "a ⋆' b" := (star' a b) (at level 20).
+  Lemma star'_concat {A : Type} {a : A} (α ϐ : idpath a = idpath a) :
+    α ⋆' ϐ = ϐ @ α.
+  Proof.
+    reflexivity.
+  Qed.
+  Lemma star_star' {A : Type} {a b c : A} {p q : a = b} {r s : b = c} (α : p = q) (ϐ : r = s):
+    α ⋆ ϐ = α ⋆' ϐ.
+  Proof.
+    destruct α, ϐ, p, r.
+    reflexivity.
+  Qed.
+  (* Theorem 2.1.6 *)
+  Definition eckmannHilton {A : Type} (a : A) (α ϐ : 1 = 1 :> (a = a)): α @ ϐ = ϐ @ α.
+  Proof.
+    rewrite <- star_concat.
+    rewrite <- star'_concat.
+    rewrite star_star'.
+    reflexivity.
+  Qed.
+End Eckmann.
 
 Definition Book_2_1_6 := @HoTT.Basics.PathGroupoids.eckmann_hilton.
 
@@ -124,6 +181,19 @@ Definition Book_2_3_1 := @HoTT.Basics.Overture.transport.
 
 (* special case of *)
 Definition Book_2_3_2 := @HoTT.Types.Sigma.equiv_path_sigma.
+Section Path_lift.
+  Local Open Scope fibration_scope.
+  Definition lift {A : Type} {x y : A} {P : A -> Type} (u : P x) (p : x = y) :
+    (x;u) = (y;p#u) :=
+    match p with
+      1 => 1
+    end.
+
+  Lemma lift_compute {A} {x y : A} {P : A -> Type} (u: P x) (p: x = y): ap pr1 (lift u p) = p.
+  Proof.
+    destruct p; reflexivity.
+  Qed.
+End Path_lift.
 
 (* ================================================== lem:mapdep *)
 (** Lemma 2.3.4 *)
@@ -140,20 +210,20 @@ Definition Book_2_3_5 := @HoTT.Basics.PathGroupoids.transport_const.
 
 Definition Book_2_3_8 := @HoTT.Basics.PathGroupoids.apD_const.
 
-(* ================================================== thm:transport-concat *)
+(* ================================================== thm:ap-transport *)
 (** Lemma 2.3.9 *)
 
-Definition Book_2_3_9 := @HoTT.Basics.PathGroupoids.transport_compose.
+Definition Book_2_3_9 := @HoTT.Basics.PathGroupoids.transport_pp.
 
-(* ================================================== thm:transport-compose *)
+(* ================================================== thm:transport-concat *)
 (** Lemma 2.3.10 *)
 
-Definition Book_2_3_10 := @HoTT.Basics.PathGroupoids.ap_transport.
+Definition Book_2_3_10 := @HoTT.Basics.PathGroupoids.transport_compose.
 
-(* ================================================== thm:ap-transport *)
+(* ================================================== thm:transport-compose *)
 (** Lemma 2.3.11 *)
 
-Definition Book_2_3_11 := @HoTT.Basics.PathGroupoids.transport_pp.
+Definition Book_2_3_11 := @HoTT.Basics.PathGroupoids.ap_transport.
 
 (* ================================================== defn:homotopy *)
 (** Definition 2.4.1 *)
@@ -163,7 +233,9 @@ Definition Book_2_4_1 := @HoTT.Basics.Overture.pointwise_paths.
 (* ================================================== lem:homotopy-props *)
 (** Lemma 2.4.2 *)
 
-Definition Book_2_4_2 := @HoTT.Basics.Overture.pointwise_paths.
+Definition Book_2_4_2_i := @HoTT.Basics.Overture.reflexive_pointwise_paths.
+Definition Book_2_4_2_ii := @HoTT.Basics.Overture.symmetric_pointwise_paths.
+Definition Book_2_4_2_iii := @HoTT.Basics.Overture.transitive_pointwise_paths.
 
 (* ================================================== lem:htpy-natural *)
 (** Lemma 2.4.3 *)
@@ -174,6 +246,37 @@ Definition Book_2_4_3 := @HoTT.Basics.PathGroupoids.concat_Ap.
 (** Corollary 2.4.4 *)
 
 Definition Book_2_4_4 := @HoTT.Basics.PathGroupoids.concat_A1p.
+Section Homotopy_commutative.
+  Context {A : Type} {f : A -> A} (H : forall x, f x = x) {x : A}.
+  (* Compute (concat_p1 (ap f (H x)))^ *)
+  (*         @ (idpath @@ (concat_pV (H x))^) *)
+  (*         @ (concat_p_pp _ _ _) *)
+  (*         @ ((concat_Ap H (H x)) @@ idpath) *)
+  (*         @ (concat_pp_p _ _ _) *)
+  (*         @ (idpath @@ (((ap_idmap _)) @@ idpath)) *)
+  (*         @ (idpath @@ (concat_pV (H x))) *)
+  (*         @ (concat_p1 _). *)
+  Definition hom_comm:
+    ap f (H x) = H (f x) :=
+    (concat_p1 (ap f (H x)))^
+    @ (whiskerL _ (concat_pV (H x))^)
+    @ (concat_p_pp _ _ _)
+    @ (whiskerR (concat_Ap H (H x)) _)
+    @ (concat_pp_p _ _ _)
+    @ (whiskerL _ (whiskerR (ap_idmap _) _))
+    @ (whiskerL _ (concat_pV (H x)))
+    @ (concat_p1 _).
+  (*   replace (ap f (H x)) with ((ap f (H x)) @ 1) by now rewrite <- concat_p1. *)
+  (*   rewrite <- (concat_pV (H x)). *)
+  (*   rewrite concat_p_pp. *)
+  (*   rewrite (concat_Ap H (H x)). *)
+  (*   rewrite concat_pp_p. *)
+  (*   rewrite ap_idmap. *)
+  (*   rewrite (concat_pV (H x)). *)
+  (*   apply concat_p1. *)
+  (* Defined. *)
+
+End Homotopy_commutative.
 
 (* ================================================== defn:quasi-inverse *)
 (** Definition 2.4.6 *)
@@ -185,21 +288,52 @@ Definition Book_2_4_4 := @HoTT.Basics.PathGroupoids.concat_A1p.
 
 Definition Book_2_4_6 := @HoTT.Basics.Equivalences.isequiv_adjointify.
 
+Definition is_qinv {A B : Type} (f : A -> B)
+  := { g : B -> A & ((f o g == idmap) * (g o f == idmap))%type }.
+Definition qinv (A B : Type)
+  := { f : A -> B & is_qinv f }.
+
 (* ================================================== eg:idequiv *)
 (** Example 2.4.7 *)
 
 Definition Book_2_4_7 := @HoTT.Basics.Equivalences.equiv_idmap.
+Definition qinv_id A : qinv A A
+  := (fun x => x; (fun x => x ; (fun x => 1, fun x => 1)))%path.
 
 (* ================================================== eg:concatequiv *)
 (** Example 2.4.8 *)
 
 Definition Book_2_4_8_i := @HoTT.Types.Paths.isequiv_concat_l.
+Definition qinv_path_i {A : Type} {x y : A} (p : x = y:>A) (z : A) : qinv (y = z) (x = z).
+Proof.
+  exists (fun (q: y = z) => p @ q).
+  exists (fun (r: x = z) => p^ @ r).
+  split; intro a; rewrite concat_p_pp;
+    [rewrite concat_pV | rewrite concat_Vp];
+    apply concat_1p.
+Defined.
 Definition Book_2_4_8_ii := @HoTT.Types.Paths.isequiv_concat_r.
+Definition qinv_path_ii {A : Type} {x y : A} (p : x = y) (z : A) : qinv (z = x) (z = y).
+Proof.
+  exists (fun (q: z = x) => q @ p).
+  exists (fun (r: z = y) => r @ p^).
+  split; intro a; rewrite <- concat_p_pp;
+    [rewrite concat_Vp | rewrite concat_pV];
+    apply concat_p1.
+Defined.
 
 (* ================================================== thm:transportequiv *)
 (** Example 2.4.9 *)
 
 Definition Book_2_4_9 := @HoTT.Basics.Equivalences.isequiv_transport.
+Definition qinv_transport {A : Type} {x y : A} (p : x = y) (P : A -> Type): qinv (P x) (P y).
+Proof.
+  exists (fun (u : P x) => p # u).
+  exists (fun (v : P y) => p^ # v).
+  split; intro a; rewrite <- transport_pp;
+    [rewrite concat_Vp | rewrite concat_pV];
+    exact idpath.
+Defined.
 
 (* ================================================== thm:equiv-eqrel *)
 (** Lemma 2.4.12 *)
@@ -243,10 +377,39 @@ Definition Book_2_7_4 := @HoTT.Types.Sigma.transportD_is_transport.
 
 Definition Book_2_8_1 := @HoTT.Types.Unit.equiv_path_unit.
 
+
+(* ================================================== axiom:fun-equiv *)
+(** Axiom 2.9.1 *)
+
+Definition Book_2_9_1 := @equiv_apD10.
+
+(* ================================================== def:happly *)
+(** Definition 2.9.2 *)
+
+Definition Book_2_9_2 := @apD10.
+
 (* ================================================== axiom:funext *)
 (** Axiom 2.9.3 *)
 
 Definition Book_2_9_3 := @HoTT.Basics.Overture.path_forall.
+
+(* ================================================== fun:path-algebras *)
+
+Definition path_forall_computational := @apD10_path_forall.
+Definition path_forall_uniq := @eta_path_forall.
+Definition path_forall_refl := @path_forall_1.
+Definition path_forall_inv := @path_forall_V.
+Definition path_forall_composition := @path_forall_pp.
+
+
+(* ================================================== fun:path-transport *)
+(** Definition 2.9.4 *)
+
+Definition Book_2_9_4 := @transport_arrow.
+
+(** Definition 2.9.5 *)
+
+Definition Book_2_9_5 := @transport_forall.
 
 (* ================================================== thm:dpath-arrow *)
 (** Lemma 2.9.6 *)
@@ -268,11 +431,21 @@ Definition Book_2_10_1 := @HoTT.Types.Universe.equiv_path.
 
 Definition Book_2_10_3 := @HoTT.Types.Universe.isequiv_equiv_path.
 
+Definition ua := @path_universe.
+Definition idtoeqv := @equiv_path.
+Definition path_universe_computation := @equiv_path_path_universe.
+Definition path_universe_uniq := @eta_path_universe.
+
+Check path_universe_1.
+Check path_universe_compose.
+Check path_universe_V.
+
 (* ================================================== thm:transport-is-ap *)
 (** Lemma 2.10.5 *)
 
 (** Lemma 2.10.5 is a special case of Lemma 2.3.10, but also of: *)
 Definition Book_2_10_5 := @HoTT.Types.Universe.transport_path_universe'.
+
 
 (* ================================================== thm:paths-respects-equiv *)
 (** Theorem 2.11.1 *)
@@ -438,6 +611,118 @@ Definition Book_3_6_2 `{Funext} (A : Type) (B : A -> Type)
 (* ================================================== defn:logical-notation *)
 (** Definition 3.7.1 *)
 
+(* Section  Book_3_7_1. *)
+(*   Local Unset Elimination Schemes. *)
+
+(*   Private Inductive PropTrunc (A : Type) : Type := *)
+(*     tr' : A -> PropTrunc A. *)
+(*   Global Instance isHprop_PropTrunc (A : Type) *)
+(*     : IsHProp (PropTrunc A). *)
+(*   Admitted. *)
+
+(*   Arguments tr' {A} a. *)
+
+(*   Theorem Book_3_11_neg: forall A, PropTrunc A -> A. *)
+(*     intros A [a]. exact a. *)
+(*   Qed. *)
+(*   Lemma Book_3_4_solution_1 `{Funext} (A : Type) : IsHProp A <-> Contr (A -> A). *)
+(*   Proof. *)
+(*     split. *)
+(*     - intro isHProp_A. *)
+(*       exists idmap. *)
+(*       apply path_ishprop. (* automagically, from IsHProp A *) *)
+(*     - intro contr_AA. *)
+(*       apply hprop_allpath; intros a1 a2. *)
+(*       exact (ap10 (path_contr (fun x:A => a1) (fun x:A => a2)) a1). *)
+(*   Defined. *)
+(*   Lemma univalence_func_natural_equiv `{Univalence} *)
+(*     : forall (C : Type -> Type) (all_contr : forall A, Contr (C A -> C A)) *)
+(*         (g : forall A, C A -> A) {A : Type}  (e : A <~> A), *)
+(*       e o (g A) = (g A). *)
+(*   Proof. *)
+(*     intros C all_contr g A e. *)
+(*     apply path_forall. *)
+
+(*     intros x. *)
+(*     pose (p := path_universe_uncurried e). *)
+
+(*     (* The propositional computation rule for univalence of section 2.10 *) *)
+(*     refine (concat (happly (transport_idmap_path_universe_uncurried e)^ (g A x)) _). *)
+
+(*     (** To obtain the situation of 2.9.4, we rewrite x using *)
+
+(*       <<< *)
+(*         x = transport (fun A : Type => C A) p^ x *)
+(*       >>> *)
+
+(*       This equality holds because [(C A) -> (C A)] is contractible, so *)
+
+(*       <<< *)
+(*         transport (fun A : Type => C A) p^ = idmap *)
+(*       >>> *)
+
+(*       In both Theorem 3.2.2 and the following result, the hypothesis *)
+(*       [Contr ((C A) -> (C A))] will follow from the contractibility of [(C A)]. *)
+(*      *) *)
+(*     refine (concat (ap _ (ap _ (happly (@path_contr _ (all_contr A) *)
+(*                                           idmap (transport _ p^)) x))) _). *)
+
+(*     (* Equation 2.9.4 is called transport_arrow in the library. *) *)
+(*     refine (concat (@transport_arrow _ (fun A => C A) idmap _ _ p (g A) x)^ _). *)
+
+(*     exact (happly (apD g p) x). *)
+(*   Defined. *)
+(*   Theorem Book_3_11 `{Univalence}: ~ (forall A, PropTrunc A -> A). *)
+(*     intros g. *)
+
+(*     assert (end_contr : forall A, Contr (PropTrunc A -> PropTrunc A)). *)
+(*     { *)
+(*       intros A. *)
+(*       apply Book_3_4_solution_1. *)
+(*       apply isHprop_PropTrunc. *)
+(*     } *)
+(*     pose *)
+(*       (contr b := *)
+(*          (not_fixed_negb (g Bool b)) *)
+(*            (happly (univalence_func_natural_equiv _ end_contr g equiv_negb) b)). *)
+(*     contradiction (contr (tr' true)). *)
+(*   Qed. *)
+
+(*   Corollary explosion `{Univalence} : Empty. *)
+(*   Proof. *)
+(*     exact (Book_3_11 Book_3_11_neg). *)
+(*   Qed. *)
+
+(*   Variables A : Type. *)
+
+(*   Definition prop_trunc_rec {B} `{IsHProp B} (f : A -> B): PropTrunc A -> B *)
+(*     := (fun aa => match aa with tr' a => f a end). *)
+
+(* End Book_3_7_1. *)
+
+(* Section Book_3_17_Exercise. *)
+(*   Variables A : Type. *)
+(*   Lemma prop_trunc_comp {B} `{IsHProp B} (f : A -> B): forall a: A, prop_trunc_rec _ f (tr' _ a) = f a. *)
+(*   Proof. *)
+(*     reflexivity. *)
+(*   Qed. *)
+
+(*   Definition prop_trunc_ind (B : Trunc (-1) A -> Type) `{forall aa, IsHProp (B aa)} (f : forall a, B (tr a)) *)
+(*     : forall aa, B aa. *)
+(*   Proof. *)
+(*     intro aa. *)
+(*   Abort. *)
+
+
+(* End Book_3_17_Exercise. *)
+
+(*   Definition prop_trunc_ind (B : PropTrunc A -> Type) `{forall aa, IsHProp (B aa)} (f : forall a, B (tr a)) *)
+(*     : forall aa, B aa *)
+(*     := (fun aa => match aa with tr a => f a end). *)
+
+
+
+(* End Book_3_7_1. *)
 
 
 (* ================================================== thm:ac-epis-split *)

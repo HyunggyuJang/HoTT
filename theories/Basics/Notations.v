@@ -118,6 +118,8 @@ Reserved Notation "x .2" (at level 3, format "x '.2'").
 (** Paths *)
 Reserved Notation "p ^" (at level 3, format "p '^'").
 Reserved Notation "p @ q" (at level 20).
+Reserved Notation "p @^l q" (at level 20).
+Reserved Notation "p @^r q" (at level 20).
 Reserved Notation "p # x" (right associativity, at level 65).
 Reserved Notation "p # x" (right associativity, at level 65).
 Reserved Notation "p @@ q" (at level 20).
