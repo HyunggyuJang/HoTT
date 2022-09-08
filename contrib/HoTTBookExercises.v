@@ -897,23 +897,12 @@ Section Book_3_14.
   Hypothesis LEM : forall A : Type, IsHProp A -> A + ~A.
 
   Definition Book_3_14
-  : forall A (P : ~~A -> Type),
-    (forall a, P (fun na => na a))
-    -> (forall x y (z : P x) (w : P y), transport P (path_ishprop x y) z = w)
+  : forall {A} (P : ~~A -> Type),
+    `{forall x, IsHProp (P x)}
+    -> (forall a, P (fun na => na a))
     -> forall x, P x.
   Proof.
-    intros A P base p nna.
-    assert (forall x, IsHProp (P x)).
-    - intro x.
-      apply hprop_allpath.
-      intros x' y'.
-      etransitivity; [ symmetry; apply (p x x y' x') | ].
-     (* Without this it somehow proves [H'] using the wrong universe for hprop_Empty and fails when we do [Defined].
-        See Coq #4862. *)
-      set (path := path_ishprop x x).
-      assert (H' : idpath = path) by apply path_ishprop.
-      destruct H'.
-      reflexivity.
+    intros A P p base nna.
     - destruct (LEM (P nna) _) as [pnna|npnna]; trivial.
       refine (match _ : Empty with end).
       apply nna.
@@ -922,6 +911,10 @@ Section Book_3_14.
       exact (transport P (path_ishprop _ _) (base a)).
   Defined.
 
+  Definition Book_3_14_rec {A B} `{IsHProp B}
+    : (A -> B) -> (~~ A -> B)
+    := (Book_3_14 (fun _ => B) _).
+
   Lemma Book_3_14_equiv A : merely A <~> ~~A.
   Proof.
     apply equiv_iff_hprop.
@@ -929,9 +922,8 @@ Section Book_3_14.
       exact (fun a na => na a).
     - intro nna.
       apply (@Book_3_14 A (fun _ => merely A)).
+      * typeclasses eauto.
       * exact tr.
-      * intros x y z w.
-        apply path_ishprop.
       * exact nna.
   Defined.
 End Book_3_14.
@@ -939,7 +931,23 @@ End Book_3_14.
 (* ================================================== ex:impred-brck *)
 (** Exercise 3.15 *)
 
-
+Section Book_3_15.
+  Definition Book_3_15_rec {A B} `{IsHProp B}
+    : (A -> B) -> (forall P : HProp, (A -> P) -> P) -> B.
+  Proof using.
+    intros f trA.
+    set (B' := Build_HProp B).
+    specialize (trA B').
+    apply trA.
+    assumption.
+  Defined.
+  Lemma Book_3_15_eq {A B} `{IsHProp B} (f : A -> B)
+    : forall a, f a = Book_3_15_rec f (fun _ f' => f' a).
+  Proof using.
+    intro a. reflexivity.
+  Qed.
+  (* proportional resizing is needed? *)
+End Book_3_15.
 
 (* ================================================== ex:lem-impl-dn-commutes *)
 (** Exercise 3.16 *)
@@ -949,7 +957,23 @@ End Book_3_14.
 (* ================================================== ex:prop-trunc-ind *)
 (** Exercise 3.17 *)
 
-
+Section Book_3_17.
+  Theorem prop_trunc_ind
+  : forall A (B : merely A -> Type),
+    (forall a, B (tr a))
+    -> (forall x, IsHProp (B x))
+    -> forall x, B x.
+  Proof.
+    intros A B base p x.
+    specialize (p x).
+    unshelve eapply Trunc_rec.
+    5: eassumption.
+    { assumption. }
+    intro a.
+    assert (H: tr a = x) by (apply path_ishprop).
+    destruct H. exact (base a).
+  Defined.
+End Book_3_17.
 
 (* ================================================== ex:lem-ldn *)
 (** Exercise 3.18 *)
