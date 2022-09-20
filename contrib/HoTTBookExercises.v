@@ -813,13 +813,13 @@ Defined.
 
 (** For this proof, we closely follow the proof of Theorem 3.2.2
     from the text, replacing ¬¬A → A by ∥A∥ → A. *)
-Lemma Book_3_11 `{Univalence} : ~ (forall A, Trunc (-1) A -> A).
+Lemma Book_3_11 `{Univalence} : ~ (forall A, merely A -> A).
 Proof.
   (* The proof is by contradiction. We'll assume we have such a
      function, and obtain an element of 0. *)
   intros g.
 
-  assert (end_contr : forall A, Contr (Trunc (-1) A -> Trunc (-1) A)).
+  assert (end_contr : forall A, Contr (merely A -> merely A)).
   {
     intros A.
     apply Book_3_4_solution_1.
@@ -915,6 +915,12 @@ Section Book_3_14.
     : (A -> B) -> (~~ A -> B)
     := (Book_3_14 (fun _ => B) _).
 
+  Lemma Book_3_14_comp {A B} `{IsHProp B} (f : A -> B)
+    : forall a, f a = Book_3_14_rec f (fun na => na a).
+  Proof using.
+    intro a. unfold Book_3_14_rec, Book_3_14. destruct LEM; apply path_ishprop.
+  Qed.
+
   Lemma Book_3_14_equiv A : merely A <~> ~~A.
   Proof.
     apply equiv_iff_hprop.
@@ -966,13 +972,12 @@ Section Book_3_17.
   Proof.
     intros A B base p x.
     specialize (p x).
-    unshelve eapply Trunc_rec.
-    5: eassumption.
-    { assumption. }
+    refine (Trunc_rec _ x).
     intro a.
     assert (H: tr a = x) by (apply path_ishprop).
     destruct H. exact (base a).
   Defined.
+
 End Book_3_17.
 
 (* ================================================== ex:lem-ldn *)

@@ -452,6 +452,25 @@ Definition Book_2_10_5 := @HoTT.Types.Universe.transport_path_universe'.
 
 Definition Book_2_11_1 := @HoTT.Basics.Equivalences.isequiv_ap.
 
+Corollary Book_2_11_1_pair {A B} {w w' : A * B} {p q : w = w'}
+  : p = q <~> (ap fst p = ap fst q) * (ap snd p = ap snd q).
+Proof.
+  etransitivity.
+  1: refine (equiv_ap (equiv_path_prod _ _)^-1 _ _).
+  destruct w, w'.
+  simpl. apply equiv_inverse. etransitivity.
+  2: exact (equiv_path_prod _ _).
+  reflexivity.
+Defined.
+
+Corollary Book_2_11_1_pi `{Funext} {A B} {f g : forall x : A, B x} {p q : f = g}
+  : p = q <~> forall x : A, apD10 p x = apD10 q x.
+Proof.
+  transitivity (apD10 p = apD10 q).
+  1: refine (equiv_ap _ _ _).
+  refine (Build_Equiv _ _ apD10 _).
+Defined.
+
 (* ================================================== cor:transport-path-prepost *)
 (** Lemma 2.11.2 *)
 
@@ -728,12 +747,106 @@ Definition Book_3_6_2 `{Funext} (A : Type) (B : A -> Type)
 (* ================================================== thm:ac-epis-split *)
 (** Lemma 3.8.2 *)
 
+Lemma wrap_merely {A B} : (A -> B) -> merely A -> merely B.
+Proof.
+  intros g merelyA.
+  refine (Trunc_rec _ merelyA).
+  intro a; exact (tr (g a)).
+Defined.
 
+Context {X} `{IsHSet X}.
 
+Let AC_3_8_1 := forall (A : X -> Type) (P : forall x : X, A x -> Type),
+        (forall x : X, merely { a : A x & P x a }) -> merely { g : forall x : X, A x & forall x : X, P x (g x)}.
+Let AC_3_8_3 := forall Y, (forall x : X, merely (Y x)) -> merely (forall x : X, Y x).
+Let AC_3_8_3' := forall X Y, (forall x : X, merely (Y x)) -> merely (forall x : X, Y x).
+
+Lemma Book_3_8_2_lr : AC_3_8_3 -> AC_3_8_1.
+Proof.
+  intros H A P D.
+  apply (wrap_merely (equiv_sig_coind A P)^-1).
+  specialize (H (fun x => {a : A x & P x a})).
+  revert D.
+  exact H.
+Defined.
+
+Lemma Book_3_8_2_rl : AC_3_8_1 -> AC_3_8_3.
+Proof.
+  intros H Y.
+  specialize (H Y (fun _ _ => Unit)).
+  intro I.
+  refine (Trunc_rec _ (H _)).
+  1: intros [g _]; apply tr; assumption.
+  intro x; apply (@wrap_merely (Y x) _); try exact (I x).
+  intro y; exact (y; tt).
+Qed.
+
+Lemma Remark_3_8_4_rl {Y}: merely (forall x : X, Y x) -> (forall x : X, merely (Y x)).
+Proof.
+  intros H x.
+  revert H.
+  apply wrap_merely.
+  intro I; exact (I x).
+Qed.
 (* ================================================== thm:no-higher-ac *)
 (** Lemma 3.8.5 *)
 
-
+Lemma Book_3_8_5 `{Univalence} : exists X (Y : X -> Type), ~ AC_3_8_3'.
+Proof.
+  set (X := { A : Type0 & merely (Bool = A)}).
+  exists X.
+  set (x0 := (Bool; tr idpath) : X).
+  assert (Fact_equiv : forall (x y : X), x = y <~> (pr1 x <~> pr1 y)).
+  { intros [A p] [B q]. etransitivity.
+    1: apply equiv_inverse.
+    1: eapply equiv_path_sigma_hprop.
+    apply equiv_equiv_path.
+  }
+  pose (Fact := Fact_equiv x0 x0).
+  simpl in Fact.
+  assert (XnotSet: ~ IsHSet X).
+  {
+    intro setX. apply true_ne_false. set (Hprop_x0_eq_x0 := (hprop_allpath _ (@hset_path2 _ setX x0 x0))).
+    pose (bool_hprop := (@istrunc_equiv_istrunc _ _ Fact _ Hprop_x0_eq_x0)).
+    pose (r := @path_ishprop _ bool_hprop equiv_negb (equiv_idmap Bool)).
+    replace false with (1%equiv false) by reflexivity.
+    rewrite <- r. reflexivity.
+  }
+  assert (AisSet : forall x : X, IsHSet x.1).
+  {
+    intros [A p].
+    refine (Trunc_rec _ p).
+    intro I. rewrite <- I. typeclasses eauto.
+  }
+  assert (set_equiv_set : forall x y : X, IsHSet (x.1 <~> y.1)) by (intros; apply istrunc_equiv).
+  assert (x_eq_y_set : forall x y : X, IsHSet (x = y)).
+  {
+    intros x y. pose (e := Fact_equiv x y). apply equiv_inverse in e.
+    exact (istrunc_equiv_istrunc (x.1 <~> y.1) e).
+  }
+  set (Y := fun x => x0 = x).
+  exists Y.
+  assert (YisSet : forall x, IsHSet (Y x)) by (intro x; exact (x_eq_y_set x0 x)).
+  assert (premise : forall x, merely (Y x)).
+  {
+    intros [A p].
+    refine (Trunc_rec _ p).
+    intro boolA. unfold Y.
+    apply tr. refine (equiv_inverse (Fact_equiv x0 (A; p)) _).
+    simpl. exact (equiv_path _ _ boolA).
+  }
+  unfold AC_3_8_3'.
+  intro AC.
+  specialize (AC _ Y premise).
+  refine (Trunc_rec _ AC).
+  unfold Y.
+  intro proof_of_merely. apply XnotSet.
+  apply Book_3_3_4.
+  apply hprop_allpath.
+  intros x y.
+  rewrite <- (proof_of_merely x), <- (proof_of_merely y).
+  reflexivity.
+Qed.
 
 (* ================================================== thm:prop-equiv-trunc *)
 (** Lemma 3.9.1 *)
