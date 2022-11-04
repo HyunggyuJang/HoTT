@@ -766,6 +766,7 @@ Proof.
   intros H A P D.
   apply (wrap_merely (equiv_sig_coind A P)^-1).
   specialize (H (fun x => {a : A x & P x a})).
+  simpl in H.
   revert D.
   exact H.
 Defined.
@@ -775,10 +776,11 @@ Proof.
   intros H Y.
   specialize (H Y (fun _ _ => Unit)).
   intro I.
+  simpl in H.
   refine (Trunc_rec _ (H _)).
-  1: intros [g _]; apply tr; assumption.
-  intro x; apply (@wrap_merely (Y x) _); try exact (I x).
-  intro y; exact (y; tt).
+  1: intros [g _]. 1: apply tr. 1: assumption.
+  intro x. specialize (I x). refine (Trunc_rec _ I). intro y. apply tr.
+  exact (y; tt).
 Qed.
 
 Lemma Remark_3_8_4_rl {Y}: merely (forall x : X, Y x) -> (forall x : X, merely (Y x)).
@@ -800,17 +802,18 @@ Proof.
   { intros [A p] [B q]. etransitivity.
     1: apply equiv_inverse.
     1: eapply equiv_path_sigma_hprop.
+    simpl.
     apply equiv_equiv_path.
   }
-  pose (Fact := Fact_equiv x0 x0).
-  simpl in Fact.
+  pose (Fact_x0 := Fact_equiv x0 x0).
+  simpl in Fact_x0.
   assert (XnotSet: ~ IsHSet X).
   {
     intro setX. apply true_ne_false. set (Hprop_x0_eq_x0 := (hprop_allpath _ (@hset_path2 _ setX x0 x0))).
-    pose (bool_hprop := (@istrunc_equiv_istrunc _ _ Fact _ Hprop_x0_eq_x0)).
+    pose (bool_hprop := (@istrunc_equiv_istrunc _ _ Fact_x0 _ Hprop_x0_eq_x0)).
     pose (r := @path_ishprop _ bool_hprop equiv_negb (equiv_idmap Bool)).
     replace false with (1%equiv false) by reflexivity.
-    rewrite <- r. reflexivity.
+    rewrite <- r. simpl. reflexivity.
   }
   assert (AisSet : forall x : X, IsHSet x.1).
   {
@@ -948,6 +951,7 @@ Definition Book_4_2_4 := @HoTT.Basics.Overture.hfiber.
 (** Lemma 4.2.5 *)
 
 Definition Book_4_2_5 := @HoTT.HFiber.equiv_path_hfiber.
+
 
 (* ================================================== thm:contr-hae *)
 (** Theorem 4.2.6 *)
