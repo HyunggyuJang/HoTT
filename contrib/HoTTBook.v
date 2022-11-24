@@ -795,17 +795,103 @@ Definition Book_4_9_5 := @HoTT.Metatheory.FunextVarieties.WeakFunext_implies_Fun
 (* ================================================== defn:nalg *)
 (** Definition 5.4.1 *)
 
-
+Definition NAlg := { C | C * (C -> C) }.
 
 (* ================================================== defn:nhom *)
 (** Definition 5.4.2 *)
 
+Definition NHom (N M : NAlg) :=
+  match N, M with
+    (C; (c0, c_s)), (D; (d0, d_s)) =>
+      { h: C -> D | (h c0 = d0) * forall c : C, h (c_s c) = d_s (h c) }
+  end.
 
+(* ================================================== defn:n-hinit *)
+(** Definition 5.4.3 *)
+
+Definition IsNHinit (I : NAlg) := forall C : NAlg, Contr (NHom I C).
+Definition NHinit := { I : NAlg & IsNHinit I }.
+
+(* ================================================== thm:ishprop-n-hinit *)
+(** Theorem 5.4.4 *)
+
+Definition NHom_compose {J K L} (F : NHom J K) (G : NHom K L) : NHom J L :=
+  match J, K, L with
+    (C; (c0, c_s)), (D; (d0, d_s)), (E; (e0, e_s)) =>
+      match F, G with
+        (f; (F0, F_s)), (g; (G0, G_s)) =>
+          (g o f; ((ap g F0) @ G0, fun c => (ap g (F_s c)) @ (G_s (f c))))
+      end
+  end.
+Notation "g 'o' f" := (NHom_compose f g).
+
+Definition Id_NHom {M} : NHom M M := (idmap; (1, fun _ => 1))%path.
+
+(* Lemma NAlg_equiv {I J} (f : NHom I J) (g : NHom J I) (issect : g o f = Id_NHom) (isretr : f o g = Id_NHom): *)
+(*   I <~> J. *)
+(* Proof. *)
+(*   eapply path_universe. *)
+(*   destruct I as [C [c0 c_s]], J as [D [d0 d_s]]. *)
+(*   destruct f as [f [F0 F_s]], g as [g [G0 G_s]]. *)
+(*   apply equiv_path_sigma in issect, isretr. *)
+(*   simpl in issect, isretr. *)
+(*   destruct issect as [issect SectHom], isretr as [isretr RetrHom]. *)
+(*   assert (C <~> D) as C_equiv_D. *)
+(*   { apply (equiv_adjointify f g). *)
+(*     - exact (happly isretr). *)
+(*     - exact (happly issect). *)
+(*   } *)
+(*   apply equiv_path_sigma. *)
+(*   pose (C_eq_D := path_universe_uncurried C_equiv_D). *)
+(*   apply equiv_path_prod. *)
+
+(*+ Cannot form I <~> J, as equiv is not defined on NAlg, but Type *)
+
+Theorem IsHProp_NHinit `{Univalence}: IsHProp NHinit.
+Proof.
+  apply hprop_allpath.
+  intros [I I_is_NHinit] [J J_is_NHinit].
+  apply equiv_path_sigma; simpl.
+  destruct (I_is_NHinit J) as [f Fcontr].
+  destruct (J_is_NHinit I) as [g Gcontr].
+  destruct (I_is_NHinit I) as [I_id IdContr].
+  pose (gf_eq_id := (IdContr (g o f))^ @ (IdContr Id_NHom)).
+  assert (p : I = J).
+  - apply equiv_path_sigma.
+    assert (I.1 = J.1).
+    + apply path_universe_uncurried.
+Admitted.
 
 (* ================================================== thm:nat-hinitial *)
 (** Theorem 5.4.5 *)
 
-
+Theorem Nat_IsNHinit `{Funext}:  IsNHinit (nat; (0, S)%nat).
+Proof.
+  intros [C [c0 c_s]].
+  set (f := fix f (n : nat) : C :=
+         match n with
+         | 0%nat => c0
+         | (S m)%nat => c_s (f m)
+         end).
+  exists (f; (1%path, fun _ => 1%path)).
+  intros [g [G0 G_s]].
+  apply equiv_path_sigma.
+  simpl.
+  assert (f = g) as p.
+  1: {
+    apply path_forall.
+    intro n. induction n.
+    - exact (G0^).
+    - simpl. rewrite IHn. exact (G_s n)^.
+  }
+  exists p.
+  rewrite transport_prod.
+  simpl.
+  apply path_prod.
+  all: simpl.
+  1: rewrite transport_paths_Fl.
+Admitted.
+(*+ Cannot prove G0 unless C is HSet *)
 
 (* ================================================== thm:w-hinit *)
 (** Theorem 5.4.7 *)
