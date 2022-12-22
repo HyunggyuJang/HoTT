@@ -992,19 +992,20 @@ Variable (A : Type) (B : A -> Type).
 
 Definition polynomial X := { x : A | B x -> X }.
 
-Record WAlg : Type := {
-    C : Type;
-    s_C : polynomial C -> C
+Record WAlg {C : Type} : Type := {
+    s_W : polynomial C -> C
 }.
 
-Definition issig_WAlg
-  : _ <~> WAlg := ltac:(issig).
+Check @WAlg A : Type.
 
-Definition WHom (N M : WAlg) :=
-  { f: C N -> C M | forall a h, f (s_C N (a; h)) = s_C M (a; (f o h)%function) }.
+Definition issig_WAlg {C : Type}
+  : _ <~> @WAlg C := ltac:(issig).
 
-Definition IsWHinit (I : WAlg) := forall C : WAlg, Contr (WHom I C).
-Definition WHinit := { I : WAlg & IsWHinit I }.
+Definition WHom {C D : Type} (N : @WAlg C) (M : @WAlg D) :=
+  { f: C -> D | forall a h, f (s_W N (a; h)) = s_W M (a; (f o h)%function) }.
+
+Definition IsWHinit {C D : Type} (I : @WAlg C) := forall N : @WAlg D, Contr (WHom I N).
+Definition WHinit {C D : Type} := { I : @WAlg C & @IsWHinit C D I }.
 
 Check W_rec.
 
@@ -1088,7 +1089,7 @@ Definition WCell
   `{Funext}
   {C : Type0} {sC : forall a, (B a -> C) -> C}
   {D : Type0} {sD : forall a, (B a -> D) -> D}
-  (h1 h2 : WHom (issig_WAlg (C; poly_in sC)) (issig_WAlg (D; poly_in sD))) : Type.
+  (h1 h2 : WHom (issig_WAlg (poly_in sC)) (issig_WAlg (poly_in sD))) : Type.
 Proof.
   destruct h1 as [h1 H1], h2 as [h2 H2].
   unfold poly_in in *.
@@ -1109,7 +1110,7 @@ Variable sC : forall a, (B a -> C) -> C.
 Variable D : Type0.
 Variable sD : forall a, (B a -> D) -> D.
 
-Variable h1 h2 : WHom (issig_WAlg (C; poly_in sC)) (issig_WAlg (D; poly_in sD)).
+Variable h1 h2 : WHom (issig_WAlg (poly_in sC)) (issig_WAlg (poly_in sD)).
 
 Context `{Funext}.
 
@@ -1159,14 +1160,6 @@ Qed.
 End WCells.
 
 End W_Algebra.
-
-
-Definition NatCell {C : Type0} {c_0 : C} {c_s : C -> C} {D : Type0} {d_0 : D} {d_s : D -> D} (h1 h2 : NHom (C; (c_0, c_s)) (D; (d_0, d_s))) : Type0
-  := match h1, h2 with
-       (h1; (H1_0, H1_s)), (h2; (H2_0, H2_s)) => (* [H1_0: h1 c_0 = d_0], [H1_s: forall c : C, h1 (c_s c) = d_s (h1 c)] *)
-         { p : forall (x : C), h1 x = h2 x
-         | (p c_0 @ H2_0 = H1_0) * (forall (x : C), p (c_s x) @ H2_s x = H1_s x @ ap d_s (p x)) }
-     end.
 
 
 (* ================================================== lem:homotopy-induction-times-3 *)
