@@ -1004,28 +1004,28 @@ Definition issig_WAlg {C : Type}
 Definition WHom {C D : Type} (N : @WAlg C) (M : @WAlg D) :=
   { f: C -> D | forall a h, f (s_W N (a; h)) = s_W M (a; (f o h)%function) }.
 
-Definition IsWHinit {C D : Type} (I : @WAlg C) := forall N : @WAlg D, Contr (WHom I N).
-Definition WHinit {C D : Type} := { I : @WAlg C & @IsWHinit C D I }.
+Definition IsWHinit {C : Type} (I : @WAlg C) := forall {D} (N : @WAlg D), Contr (WHom I N).
+Definition WHinit {C : Type} := { I : @WAlg C & IsWHinit I }.
 
-Check W_rec.
+Check W_rect.
 
 Theorem W_beta_s :
-  forall (C : W A B -> Type0)
+  forall (C : W A B -> Type)
     (sC : forall a f, (forall b : B a, C (f b)) -> C (w_sup A B a f))
   a f,
-    W_rec A B C sC (w_sup A B a f) = sC a f (fun b => W_rec A B C sC (f b)).
+    W_rect A B C sC (w_sup A B a f) = sC a f (fun b => W_rect A B C sC (f b)).
 Proof. by reflexivity. Qed.
 
 (* First-order eta rule. *)
 Definition W_eta_1
   `{Funext}
-  (C : W A B -> Type0)
+  (C : W A B -> Type)
   (sC : forall a f, (forall b : B a, C (f b)) -> C (w_sup A B a f))
   (h : forall w, C w) (p_sC : forall a f, h (w_sup A B a f) = sC a f (fun b => h (f b))) :
-  forall (w : W A B), h w = W_rec A B C sC w
-  := W_rec A B (fun w : W A B => h w = W_rec A B C sC w)
+  forall (w : W A B), h w = W_rect A B C sC w
+  := W_rect A B (fun w : W A B => h w = W_rect A B C sC w)
        (fun (a : A) (f : B a -> W A B)
-          (hyp : forall b : B a, h (f b) = W_rec A B C sC (f b)) =>
+          (hyp : forall b : B a, h (f b) = W_rect A B C sC (f b)) =>
   p_sC a f
   @ ap (sC a f)
      (path_forall _ _ hyp)
@@ -1033,7 +1033,7 @@ Definition W_eta_1
 
 (* Second-order eta rules. *)
 Definition W_eta_2_s `{Funext}
-  (C : W A B -> Type0) (sC : forall a f, (forall b : B a, C (f b)) -> C (w_sup A B a f))
+  (C : W A B -> Type) (sC : forall a f, (forall b : B a, C (f b)) -> C (w_sup A B a f))
   (h : forall w, C w) (p_sC : forall a f, h (w_sup A B a f) = sC a f (fun b => h (f b))) :
   forall a f,
     W_eta_1 C sC h p_sC (w_sup A B a f) @ W_beta_s C sC a f
@@ -1043,32 +1043,32 @@ Definition W_eta_2_s `{Funext}
 Proof.
   intros.
   apply moveR_pM.
-  apply W_beta_s with (C := fun w => h w = W_rec A B C sC w).
+  apply W_beta_s with (C := fun w => h w = W_rect A B C sC w).
 Defined.
 
-Definition W_rec_simp (C : Type0) (sC : forall a f, (B a -> C) -> C) : forall (w : W A B), C
-  := W_rec A B (fun _ => C) sC.
+Definition W_rec_simp (C : Type) (sC : forall a, (B a -> C) -> C) : forall (w : W A B), C
+  := W_rect A B (fun _ => C) (fun a _ => sC a).
 
-Definition W_beta_simp_s (C : Type0) (sC : forall a f, (B a -> C) -> C) :
+Definition W_beta_simp_s (C : Type) (sC : forall a, (B a -> C) -> C) :
   forall a f,
-    W_rec_simp C sC (w_sup A B a f) = sC a f (fun b => W_rec_simp C sC (f b))
-  := W_beta_s (fun _ => C) sC.
+    W_rec_simp C sC (w_sup A B a f) = sC a (fun b => W_rec_simp C sC (f b))
+  := W_beta_s (fun _ => C) (fun a _ => sC a).
 
 Definition W_eta_simp_1 `{Funext}
-  (C : Type0) (sC : forall a f, (B a -> C) -> C)
-  (h : W A B -> C) (p_sC : forall a f, h (w_sup A B a f) = sC a f (fun b => h (f b))) :
+  (C : Type) (sC : forall a, (B a -> C) -> C)
+  (h : W A B -> C) (p_sC : forall a f, h (w_sup A B a f) = sC a (fun b => h (f b))) :
   forall (w : W A B), h w = W_rec_simp C sC w
-  := W_eta_1 (fun _ => C) sC h p_sC.
+  := W_eta_1 (fun _ => C) (fun a _ => sC a) h p_sC.
 
 Definition W_eta_simp_2_s `{Funext}
-  (C : Type0) (sC : forall a f, (B a -> C) -> C)
-  (h : W A B -> C) (p_sC : forall a f, h (w_sup A B a f) = sC a f (fun b => h (f b))) :
+  (C : Type) (sC : forall a, (B a -> C) -> C)
+  (h : W A B -> C) (p_sC : forall a f, h (w_sup A B a f) = sC a (fun b => h (f b))) :
   forall a f,
     W_eta_simp_1 C sC h p_sC (w_sup A B a f) @ W_beta_simp_s C sC a f
     = p_sC a f
-      @ ap (sC a f)
-        (path_forall _ _ (fun b : B a => W_eta_1 (fun _ => C) sC h p_sC (f b)))
-  := W_eta_2_s (fun _ => C) sC h p_sC.
+      @ ap (sC a)
+        (path_forall _ _ (fun b : B a => W_eta_1 (fun _ => C) (fun a _ => sC a) h p_sC (f b)))
+  := W_eta_2_s (fun _ => C) (fun a _ => sC a) h p_sC.
 
 Lemma poly_out {X} : (polynomial X -> X) -> (forall a, (B a -> X) -> X).
 intros H a H'.
@@ -1087,30 +1087,28 @@ Defined.
 
 Definition WCell
   `{Funext}
-  {C : Type0} {sC : forall a, (B a -> C) -> C}
-  {D : Type0} {sD : forall a, (B a -> D) -> D}
-  (h1 h2 : WHom (issig_WAlg (poly_in sC)) (issig_WAlg (poly_in sD))) : Type.
+  {C : Type} {s_C : polynomial C -> C}
+  {D : Type} {s_D : polynomial D -> D}
+  (h1 h2 : WHom (issig_WAlg s_C) (issig_WAlg s_D)) : Type.
 Proof.
   destruct h1 as [h1 H1], h2 as [h2 H2].
-  unfold poly_in in *.
-  simpl in *.
   refine (
       { p : forall (x : C), h1 x = h2 x
-      | forall a f, p (sC a f) @ H2 a f = H1 a f @ _ }
+      | forall a f, p (poly_out s_C a f) @ H2 a f = H1 a f @ _ }
     ).
-  refine (ap (sD a) _).
+  refine (ap (poly_out s_D a) _).
   apply path_forall.
   by intro x.
 Defined.
 
 Section WCells.
-Variable C : Type0.
-Variable sC : forall a, (B a -> C) -> C.
+Variable C : Type.
+Variable s_C : polynomial C -> C.
 
-Variable D : Type0.
-Variable sD : forall a, (B a -> D) -> D.
+Variable D : Type.
+Variable s_D : polynomial D -> D.
 
-Variable h1 h2 : WHom (issig_WAlg (poly_in sC)) (issig_WAlg (poly_in sD)).
+Variable h1 h2 : WHom (issig_WAlg s_C) (issig_WAlg s_D).
 
 Context `{Funext}.
 
@@ -1131,12 +1129,12 @@ Proof.
   unfold poly_in, p'. simpl.
   apply path_forall. intro a. rewrite transport_forall_constant.
   apply path_forall. intro f. rewrite transport_forall_constant.
-  rewrite (path_forall_recr_beta _ _ (sC a f) (fun g d => d = sD a (fun b => g (f b)))).
+  rewrite (path_forall_recr_beta _ _ (poly_out s_C a f) (fun g d => d = poly_out s_D a (fun b => g (f b)))).
   rewrite transport_paths_l. rewrite transport_paths_Fr. rewrite concat_pp_p.
   apply moveR_Vp. apply inverse.
   assert (rw :
-      ap (fun y : C -> D => sD a (fun b : B a => y (f b))) (path_forall h1.1 h2.1 p)
-      = ap (sD a)
+      ap (fun y : C -> D => poly_out s_D a (fun b : B a => y (f b))) (path_forall h1.1 h2.1 p)
+      = ap (poly_out s_D a)
           (path_forall
              (fun x : B a => h1.1 (f x))
              (fun x : B a => h2.1 (f x))
@@ -1145,7 +1143,7 @@ Proof.
   {
     clear.
     rewrite ap_apply_Fr.
-    apply (ap (ap (sD a))).
+    apply (ap (ap (poly_out s_D a))).
     rewrite ap_lambda.
     unfold path_arrow.
     apply ap.
@@ -1154,10 +1152,27 @@ Proof.
     rewrite ap_apply_l.
     by rewrite ap10_path_forall.
   }
-  by rewrite rw.
+  rewrite rw.
+  exact (q a f).
 Qed.
 
 End WCells.
+
+Check w_sup.
+
+Theorem W_IsWHinit `{H0 : Funext}: IsWHinit (issig_WAlg (poly_in (w_sup A B))).
+Proof.
+  intros C [s_C].
+  set (sC := poly_out s_C).
+  exists (W_rec_simp C sC; W_beta_simp_s C sC).
+  intros [g p_sC].
+  apply W_cell_to_prop_eq with (H0 := H0).
+  split with (fun w => (W_eta_simp_1 C sC g p_sC w)^).
+  intros a f.
+  apply moveR_Vp. rewrite concat_p_pp. rewrite path_forall_V, ap_V. apply moveL_pV, inverse.
+  revert a f.
+  apply (W_eta_simp_2_s C sC g p_sC).
+Qed.
 
 End W_Algebra.
 
