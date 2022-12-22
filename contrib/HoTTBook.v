@@ -866,65 +866,65 @@ Abort.
 
 Check nat_rec.
 
-Theorem nat_beta_0: forall (C : nat -> Type0) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat),
-    nat_rec C c_0 c_s 0 = c_0.
+Theorem nat_beta_0: forall (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat),
+    nat_rect C c_0 c_s 0 = c_0.
 Proof. by reflexivity. Qed.
 
-Theorem nat_beta_s: forall (C : nat -> Type0) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat)
-  (n : nat), nat_rec C c_0 c_s (S n)%nat = c_s n (nat_rec C c_0 c_s n).
+Theorem nat_beta_s: forall (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat)
+  (n : nat), nat_rect C c_0 c_s (S n)%nat = c_s n (nat_rect C c_0 c_s n).
 Proof. by reflexivity. Qed.
 
 (* First-order eta rule. *)
-Definition nat_eta_1 (C : nat -> Type0) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
-  forall (x : nat), h x = nat_rec C c_0 c_s x
-  := nat_rec (fun x => h x = nat_rec C c_0 c_s x)
+Definition nat_eta_1 (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
+  forall (x : nat), h x = nat_rect C c_0 c_s x
+  := nat_rect (fun x => h x = nat_rect C c_0 c_s x)
              (p_0 @ (nat_beta_0 C c_0 c_s)^)
              (fun n hyp => p_s n @ (ap (c_s n) hyp) @ (nat_beta_s C c_0 c_s n)^).
 
 (* Second-order eta rules. *)
-Definition nat_eta_2_0 (C : nat -> Type0) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
+Definition nat_eta_2_0 (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
   nat_eta_1 C c_0 c_s h p_0 p_s 0%nat @ nat_beta_0 C c_0 c_s = p_0.
 Proof.
 apply moveR_pM.
-apply nat_beta_0 with (C := fun x => h x = nat_rec C c_0 c_s x).
+apply nat_beta_0 with (C := fun x => h x = nat_rect C c_0 c_s x).
 Defined.
 
-Definition nat_eta_2_s (C : nat -> Type0) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
+Definition nat_eta_2_s (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
   forall (n : nat),
     nat_eta_1 C c_0 c_s h p_0 p_s (S n)%nat @ nat_beta_s C c_0 c_s n
     = p_s n @ ap (c_s n) (nat_eta_1 C c_0 c_s h p_0 p_s n).
 Proof.
 intro.
 apply moveR_pM.
-apply nat_beta_s with (C := fun x => h x = nat_rec C c_0 c_s x).
+apply nat_beta_s with (C := fun x => h x = nat_rect C c_0 c_s x).
 Defined.
 
-Definition nat_rec_simp (C : Type0) (c_0 : C) (c_s : C -> C) : forall (n : nat), C
-  := nat_rec (fun _ => C) c_0 (fun _ => c_s).
+Definition nat_rec_simp (C : Type) (c_0 : C) (c_s : C -> C) : forall (n : nat), C
+  := nat_rect (fun _ => C) c_0 (fun _ => c_s).
 
-Definition nat_beta_simp_0 (C : Type0) (c_0 : C) (c_s : C -> C) : nat_rec_simp C c_0 c_s 0 = c_0
+Definition nat_beta_simp_0 (C : Type) (c_0 : C) (c_s : C -> C) : nat_rec_simp C c_0 c_s 0 = c_0
   := nat_beta_0 (fun _ => C) c_0 (fun _ => c_s).
 
-Definition nat_beta_simp_s (C : Type0) (c_0 : C) (c_s : C -> C) :
+Definition nat_beta_simp_s (C : Type) (c_0 : C) (c_s : C -> C) :
   forall (n : nat),
     nat_rec_simp C c_0 c_s (S n)%nat = c_s (nat_rec_simp C c_0 c_s n)
   := nat_beta_s (fun _ => C) c_0 (fun _ => c_s).
 
-Definition nat_eta_simp_1 (C : Type0) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
+Definition nat_eta_simp_1 (C : Type) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
   forall (n : nat), h n = nat_rec_simp C c_0 c_s n
   := nat_eta_1 (fun _ => C) c_0 (fun _ => c_s) h p_0 p_s.
 
-Definition nat_eta_simp_2_0 (C : Type0) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
+Definition nat_eta_simp_2_0 (C : Type) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
   nat_eta_simp_1 C c_0 c_s h p_0 p_s 0%nat @ nat_beta_simp_0 C c_0 c_s = p_0
   := nat_eta_2_0 (fun _ => C) c_0 (fun _ => c_s) h p_0 p_s.
 
-Definition nat_eta_simp_2_s (C : Type0) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
+Definition nat_eta_simp_2_s (C : Type) (c_0 : C) (c_s : C -> C) (h : nat -> C) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s (h n)) :
   forall (n : nat),
     nat_eta_simp_1 C c_0 c_s h p_0 p_s (S n)%nat @ nat_beta_simp_s C c_0 c_s n
     = p_s n @ ap c_s (nat_eta_simp_1 C c_0 c_s h p_0 p_s n)
   := nat_eta_2_s (fun _ => C) c_0 (fun _ => c_s) h p_0 p_s.
 
-Definition NatCell {C : Type0} {c_0 : C} {c_s : C -> C} {D : Type0} {d_0 : D} {d_s : D -> D} (h1 h2 : NHom (C; (c_0, c_s)) (D; (d_0, d_s))) : Type0
+Definition NatCell {C : Type} {c_0 : C} {c_s : C -> C} {D : Type} {d_0 : D} {d_s : D -> D} (h1 h2 : NHom (C; (c_0, c_s)) (D; (d_0, d_s))) : Type
   := match h1, h2 with
        (h1; (H1_0, H1_s)), (h2; (H2_0, H2_s)) => (* [H1_0: h1 c_0 = d_0], [H1_s: forall c : C, h1 (c_s c) = d_s (h1 c)] *)
          { p : forall (x : C), h1 x = h2 x
@@ -932,11 +932,11 @@ Definition NatCell {C : Type0} {c_0 : C} {c_s : C -> C} {D : Type0} {d_0 : D} {d
      end.
 
 Section NatCells.
-Variable C : Type0.
+Variable C : Type.
 Variable c_0 : C.
 Variable c_s : C -> C.
 
-Variable D : Type0.
+Variable D : Type.
 Variable d_0 : D.
 Variable d_s : D -> D.
 Variable h1 h2 : NHom (C; (c_0, c_s)) (D; (d_0, d_s)).
