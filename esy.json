@@ -1,0 +1,15 @@
+{
+    "name": "HoTT",
+    "description": "The Homotopy Type Theory library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "esy": {
+        "buildEnv": {
+            "COQBIN": "#{@opam/coq.bin}/",
+            "COQLIB": "#{@opam/coq.lib}/coq/"
+        }
+    },
+    "dependencies": {
+        "@opam/coq": "8.16.1"
+    }
+}

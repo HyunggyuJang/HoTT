@@ -107,3 +107,7 @@ _build/
 
 # ignore _CoqProject since we autogenerate it
 _CoqProject
+
+# Ignore esy artifacts
+/_esy/
+/node_modules/
