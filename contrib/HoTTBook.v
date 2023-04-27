@@ -57,7 +57,7 @@
 
 *)
 
-From HoTT Require Import Basics Truncations.
+From HoTT Require Import Basics Truncations Types.
 From HoTT Require Idempotents Spaces.Spheres Spaces.No.
 From HoTT Require HIT.V HIT.Flattening Homotopy.WhiteheadsPrinciple.
 From HoTT Require Categories.
