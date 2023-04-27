@@ -10,6 +10,21 @@
         }
     },
     "dependencies": {
-        "@opam/coq": "8.16.1"
+        "@opam/coq": "8.16.1",
+        "coq-hott": "*"
+    },
+    "resolutions": {
+        "coq-hott": {
+            "source": "HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9",
+            "override": {
+                "dependencies": {
+                    "@opam/coq": "*"
+                },
+                "buildEnv": {
+                    "COQBIN": "#{@opam/coq.bin}/",
+                    "COQLIB": "#{@opam/coq.lib}/coq/"
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 {
-  "checksum": "34f8d9bc5fe46340900c8ca5b8a19725",
+  "checksum": "1548bb80e50b1ac252075477e687320a",
   "root": "HoTT@link-dev:./esy.json",
   "node": {
     "ocaml@4.14.0@d41d8cd9": {
@@ -46,13 +46,45 @@
       "dependencies": [],
       "devDependencies": []
     },
+    "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d": {
+      "id":
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d",
+      "name": "coq-hott",
+      "version":
+        "github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9",
+      "source": {
+        "type": "install",
+        "source": [
+          "github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9"
+        ]
+      },
+      "overrides": [
+        {
+          "dependencies": { "@opam/coq": "*" },
+          "buildEnv": {
+            "COQBIN": "#{@opam/coq.bin}/",
+            "COQLIB": "#{@opam/coq.lib}/coq/"
+          }
+        }
+      ],
+      "dependencies": [
+        "@opam/dune@opam:3.7.1@40db2f22", "@opam/coq@opam:8.16.1@3ae3d6b1",
+        "@esy-ocaml/substs@0.0.1@d41d8cd9"
+      ],
+      "devDependencies": [
+        "@opam/dune@opam:3.7.1@40db2f22", "@opam/coq@opam:8.16.1@3ae3d6b1"
+      ]
+    },
     "HoTT@link-dev:./esy.json": {
       "id": "HoTT@link-dev:./esy.json",
       "name": "HoTT",
       "version": "link-dev:./esy.json",
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
-      "dependencies": [ "@opam/coq@opam:8.16.1@3ae3d6b1" ],
+      "dependencies": [
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d",
+        "@opam/coq@opam:8.16.1@3ae3d6b1"
+      ],
       "devDependencies": []
     },
     "@opam/zarith@opam:1.12@23811ea3": {
