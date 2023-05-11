@@ -128,6 +128,54 @@ End Book_1_3_sig.
 (* ================================================== ex:iterator *)
 (** Exercise 1.4 *)
 
+(* Under c_s' (iter C c0 c_s' n) = c_s n (iter C c0 c_s' n)
+iter C c0 ??? 4 = c_s 3 (iter C c0 ??? 3) = ... c_s 2 (iter C c0 ??? 2) ... = ... c_s 1 (iter C c0 ??? 1) ... = ... c_s 0 (iter C c0 ??? 0) ... = ... c0 ...
+iter C c0 (c_s 3) 4 = c_s 3 (iter C c0 (c_s 2) 3) = ... c_s 2 (iter C c0 (c_s 1) 2) ... = ... c_s 1 (iter C c0 (c_s 0) 1) ... = ... c_s 0 (iter C c0 ??? 0) ... = ... c0 ...
+
+Problem
+
+iter C c0 (c_s 3) 4 = c_s 3 (iter C c0 (c_s 3) 3) = ...
+rec C c0 c_s 4 = c_s 3 (rec C c0 c_s 3) = ... = ... c0 ...
+c_s c = c_s' 4 c
+c_s'4
+C 0 = C
+C 1
+
+The function c_s' should have status for that.
+
+(0, c0); so let's use tuple for that *)
+Section Book_1_4.
+  Fixpoint iter (C: Type) (c0: C) (c_s: C -> C) (n: nat) :=
+    match n with
+      | O => c0
+      | S n => c_s (iter C c0 c_s n)
+    end.
+  Definition Book_1_4_rec_raw (C: Type) (c0: C) (c_s: nat -> C -> C) (n: nat) :=
+    iter (nat * C) (0, c0) (fun p => match p with (n, c) => (S n, c_s n c) end) n.
+  Lemma Book_1_4_rec_raw_index (C: Type) (c0: C) (c_s: nat -> C -> C) (n: nat): 
+    fst (Book_1_4_rec_raw C c0 c_s n) = n.
+  Proof.
+    induction n.
+    - done.
+    - simpl. by rewrite IHn.
+  Qed.
+  Definition Book_1_4_rec (C: Type) (c0: C) (c_s: nat -> C -> C) (n: nat) :=
+    snd (Book_1_4_rec_raw C c0 c_s n).
+  Lemma Book_1_4_rec_prop_equal_nat_rec {C c0 c_s n}:
+      Book_1_4_rec C c0 c_s n = nat_rec C c0 c_s n.
+  Proof.
+    induction n; simpl.
+    - done.
+    - rewrite <- IHn.
+      set (Book_1_4_rec C c0 c_s n.+1).
+      unfold Book_1_4_rec in c.
+      simpl in c.
+      unfold c.
+      rewrite Book_1_4_rec_raw_index.
+      done.
+  Qed.
+End Book_1_4.
+
 
 
 (* ================================================== ex:sum-via-bool *)
