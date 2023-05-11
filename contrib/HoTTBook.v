@@ -501,7 +501,7 @@ Definition Book_2_12_5 := @HoTT.Types.Sum.equiv_path_sum.
 (* ================================================== thm:path-nat *)
 (** Theorem 2.13.1 *)
 
-Definition Book_2_13_1 := @HoTT.Spaces.Nat.Core.equiv_path_nat.
+Definition Book_2_13_1 := @HoTT.Spaces.Nat.equiv_path_nat.
 
 (* ================================================== thm:prod-ump *)
 (** Theorem 2.15.2 *)
