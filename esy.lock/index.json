@@ -1,5 +1,5 @@
 {
-  "checksum": "edaf4d9df05da56a971134cf884976c0",
+  "checksum": "efb2caa6776b062d18bec9ff27f5b0e4",
   "root": "HoTT@link-dev:./esy.json",
   "node": {
     "ocaml@4.14.0@d41d8cd9": {
@@ -46,16 +46,16 @@
       "dependencies": [],
       "devDependencies": []
     },
-    "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d": {
+    "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb@1818eb0d": {
       "id":
-        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d",
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb@1818eb0d",
       "name": "coq-hott",
       "version":
-        "github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5",
+        "github:HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb",
       "source": {
         "type": "install",
         "source": [
-          "github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5"
+          "github:HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb"
         ]
       },
       "overrides": [
@@ -82,7 +82,7 @@
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
       "dependencies": [
-        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d",
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb@1818eb0d",
         "@opam/coq@opam:8.16.1@3ae3d6b1"
       ],
       "devDependencies": []
