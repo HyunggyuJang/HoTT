@@ -1,5 +1,5 @@
 {
-  "checksum": "1548bb80e50b1ac252075477e687320a",
+  "checksum": "edaf4d9df05da56a971134cf884976c0",
   "root": "HoTT@link-dev:./esy.json",
   "node": {
     "ocaml@4.14.0@d41d8cd9": {
@@ -46,16 +46,16 @@
       "dependencies": [],
       "devDependencies": []
     },
-    "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d": {
+    "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d": {
       "id":
-        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d",
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d",
       "name": "coq-hott",
       "version":
-        "github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9",
+        "github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5",
       "source": {
         "type": "install",
         "source": [
-          "github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9"
+          "github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5"
         ]
       },
       "overrides": [
@@ -68,11 +68,11 @@
         }
       ],
       "dependencies": [
-        "@opam/dune@opam:3.7.1@40db2f22", "@opam/coq@opam:8.16.1@3ae3d6b1",
+        "@opam/dune@opam:3.8.0@4684a408", "@opam/coq@opam:8.16.1@3ae3d6b1",
         "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": [
-        "@opam/dune@opam:3.7.1@40db2f22", "@opam/coq@opam:8.16.1@3ae3d6b1"
+        "@opam/dune@opam:3.8.0@4684a408", "@opam/coq@opam:8.16.1@3ae3d6b1"
       ]
     },
     "HoTT@link-dev:./esy.json": {
@@ -82,7 +82,7 @@
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
       "dependencies": [
-        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#c09f5eec60b852cab5d969e9d05cc0ec54b2b9d9@1818eb0d",
+        "coq-hott@github:HyunggyuJang/HoTT:coq-hott.opam#8ce426691d23e9de15ad7b1c13010a5176be97d5@1818eb0d",
         "@opam/coq@opam:8.16.1@3ae3d6b1"
       ],
       "devDependencies": []
@@ -146,20 +146,20 @@
       ],
       "devDependencies": [ "ocaml@4.14.0@d41d8cd9" ]
     },
-    "@opam/dune@opam:3.7.1@40db2f22": {
-      "id": "@opam/dune@opam:3.7.1@40db2f22",
+    "@opam/dune@opam:3.8.0@4684a408": {
+      "id": "@opam/dune@opam:3.8.0@4684a408",
       "name": "@opam/dune",
-      "version": "opam:3.7.1",
+      "version": "opam:3.8.0",
       "source": {
         "type": "install",
         "source": [
-          "archive:https://opam.ocaml.org/cache/sha256/ad/adfc38f14c0188a2ad80d61451d011d27ab8839b717492d7ad42f7cb911c54c3#sha256:adfc38f14c0188a2ad80d61451d011d27ab8839b717492d7ad42f7cb911c54c3",
-          "archive:https://github.com/ocaml/dune/releases/download/3.7.1/dune-3.7.1.tbz#sha256:adfc38f14c0188a2ad80d61451d011d27ab8839b717492d7ad42f7cb911c54c3"
+          "archive:https://opam.ocaml.org/cache/sha256/f7/f7e2970bfab99c7766ff1a05deff5ad7f82cb2471abca6f72449572293f5f6b4#sha256:f7e2970bfab99c7766ff1a05deff5ad7f82cb2471abca6f72449572293f5f6b4",
+          "archive:https://github.com/ocaml/dune/releases/download/3.8.0/dune-3.8.0.tbz#sha256:f7e2970bfab99c7766ff1a05deff5ad7f82cb2471abca6f72449572293f5f6b4"
         ],
         "opam": {
           "name": "dune",
-          "version": "3.7.1",
-          "path": "esy.lock/opam/dune.3.7.1"
+          "version": "3.8.0",
+          "path": "esy.lock/opam/dune.3.8.0"
         }
       },
       "overrides": [],
@@ -193,14 +193,14 @@
       "dependencies": [
         "ocaml@4.14.0@d41d8cd9", "@opam/zarith@opam:1.12@23811ea3",
         "@opam/ocamlfind@opam:1.9.6@da5169c7",
-        "@opam/dune@opam:3.7.1@40db2f22",
+        "@opam/dune@opam:3.8.0@4684a408",
         "@opam/conf-findutils@opam:1@8454cd64",
         "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": [
         "ocaml@4.14.0@d41d8cd9", "@opam/zarith@opam:1.12@23811ea3",
         "@opam/ocamlfind@opam:1.9.6@da5169c7",
-        "@opam/dune@opam:3.7.1@40db2f22"
+        "@opam/dune@opam:3.8.0@4684a408"
       ]
     },
     "@opam/conf-gmp@opam:4@c394e8f1": {
