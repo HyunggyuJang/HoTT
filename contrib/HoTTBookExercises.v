@@ -177,7 +177,6 @@ Section Book_1_4.
 End Book_1_4.
 
 
-
 (* ================================================== ex:sum-via-bool *)
 (** Exercise 1.5 *)
 
@@ -205,6 +204,27 @@ End Book_1_5.
 (* ================================================== ex:prod-via-bool *)
 (** Exercise 1.6 *)
 
+Section Book_1_6.
+  Definition Book_1_6_prod (A B : Type) := forall x : Bool, if x then A else B.
+
+  Notation "'first' p" := (p true) (at level 0).
+  Notation "'second' p" := (p false) (at level 0).
+  Notation "'pair' a b" := (fun x => if x then a else b) (at level 0, a at next level).
+
+  Variables (A B : Type) (a : A) (b : B).
+  Check (pair a b) : Book_1_6_prod A B.
+
+  Definition Book_1_6_ind (A B : Type) (C : Book_1_6_prod A B -> Type) (f : forall a b, C (pair a b))
+    : forall x : Book_1_6_prod A B, C x := fun x => f (x true) (x false).
+
+  Theorem inl_red {A B : Type} {C : Book_1_5_sum A B -> Type} f g { a : A }
+  : Book_1_5_ind A B C f g (inl a) = f a.
+  Proof. reflexivity. Defined.
+
+  Theorem inr_red {A B : Type} {C : Book_1_5_sum A B -> Type} f g { b : B }
+  : Book_1_5_ind A B C f g (inr b) = g b.
+  Proof. reflexivity. Defined.
+End Book_1_5.
 
 
 (* ================================================== ex:pm-to-ml *)

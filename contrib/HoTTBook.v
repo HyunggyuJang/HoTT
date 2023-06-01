@@ -75,6 +75,10 @@ Definition Book_2_1_1 := @HoTT.Basics.Overture.inverse.
 (** Lemma 2.1.2 *)
 
 Definition Book_2_1_2 := @HoTT.Basics.Overture.transitive_paths.
+Definition Book_2_1_2' {A : Type} {x y z : A} (p : x = y) : y = z -> x = z
+  := match p in (_ = y) return (y = z -> x = z) with
+     | 1 => idmap
+     end.
 
 (* ================================================== thm:omg *)
 (** Lemma 2.1.4 *)
@@ -99,15 +103,14 @@ Section Eckmann.
   Local Open Scope path_scope.
   Definition whisker_r {A : Type} {a b c : A} {p q : a = b} (α : p = q) (r : b = c) : p @ r = q @ r.
   Proof.
-    elim r.
-    repeat rewrite (concat_p1 _).
-    assumption.
+    destruct r.
+    by rewrite !concat_p1.
   Defined.
 
   Definition whisker_l {A : Type} {a b c : A} {r s : b = c} (q : a = b) (ϐ : r = s) : q @ r = q @ s.
   Proof.
     destruct q.
-    repeat rewrite (concat_1p _); assumption.
+    by rewrite !concat_1p.
   Defined.
   Notation "a @^l b" := (whisker_l a b)%path : path_scope.
   Notation "a @^r b" := (whisker_r a b)%path : path_scope.
@@ -118,23 +121,18 @@ Section Eckmann.
   Local Notation "a ⋆ b" := (star a b) (at level 20).
   Lemma star_concat {A : Type} {a : A} (α ϐ : idpath a = idpath a) :
     α ⋆ ϐ = α @ ϐ.
-  Proof.
-    unfold star, "@^l", "@^r". reflexivity.
-  Qed.
+  Proof. reflexivity. Qed.
   Definition star' {A : Type} {a b c : A} {p q : a = b} {r s : b = c}
     (α : p = q) (ϐ : r = s): p @ r = q @ s
     := (p @^l ϐ) @ (α @^r s).
   Local Notation "a ⋆' b" := (star' a b) (at level 20).
   Lemma star'_concat {A : Type} {a : A} (α ϐ : idpath a = idpath a) :
     α ⋆' ϐ = ϐ @ α.
-  Proof.
-    reflexivity.
-  Qed.
+  Proof. reflexivity. Qed.
   Lemma star_star' {A : Type} {a b c : A} {p q : a = b} {r s : b = c} (α : p = q) (ϐ : r = s):
     α ⋆ ϐ = α ⋆' ϐ.
   Proof.
-    destruct α, ϐ, p, r.
-    reflexivity.
+    by destruct α, ϐ, p, r.
   Qed.
   (* Theorem 2.1.6 *)
   Definition eckmannHilton {A : Type} (a : A) (α ϐ : 1 = 1 :> (a = a)): α @ ϐ = ϐ @ α.
@@ -537,7 +535,7 @@ Definition Book_3_1_3 := @HoTT.Types.Empty.hprop_Empty.
 (* ================================================== thm:nat-set *)
 (** Example 3.1.4 *)
 
-Definition Book_3_1_4 := @HoTT.Spaces.Nat.Core.hset_nat.
+Definition Book_3_1_4 := @HoTT.Spaces.Nat.hset_nat.
 
 (* ================================================== thm:isset-prod *)
 (** Example 3.1.5 *)
