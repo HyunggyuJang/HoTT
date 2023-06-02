@@ -216,28 +216,30 @@ Section Book_1_6.
     by case x.
   Defined.
 
-  Definition Book_1_6_eta {A B} {x : Book_1_6_prod A B}: pair (first x) (second x) == x
-    := fun b =>
-         match b with
-           | true => 1
-           | false => 1
-         end.
+  Definition Book_1_6_eta `{Funext} {A B} {x : Book_1_6_prod A B}: pair (first x) (second x) = x.
+  Proof.
+    apply path_forall.
+    exact (fun b =>
+             match b with
+               | true => 1
+               | false => 1
+             end).
+  Defined.
 
   Definition Book_1_6_ind `{Funext} {A B} (C : Book_1_6_prod A B -> Type) (f : forall a b, C (pair a b))
     : forall x : Book_1_6_prod A B, C x.
   Proof.
     intro x.
-    assert (pair (first x) (second x) = x) by apply path_forall, Book_1_6_eta.
-    destruct X.
+    rewrite <-Book_1_6_eta.
     exact (f (first x) (second x)).
   Defined.
 
-  Theorem pair_red `{Funext} {A B : Type} {C : Book_1_6_prod A B -> Type} f (a : A)(b : B)
-    : Book_1_6_ind C f (pair a b) = f a b.
+  Theorem pair_red `{Funext} {A B : Type} {C : Book_1_6_prod A B -> Type} f x
+    : Book_1_6_ind C f x = transport _ Book_1_6_eta (f (first x) (second x)).
   Proof.
-    unfold Book_1_6_ind. simpl.
-  Abort.
-End Book_1_5.
+    done.
+  Qed.
+End Book_1_6.
 
 
 (* ================================================== ex:pm-to-ml *)
