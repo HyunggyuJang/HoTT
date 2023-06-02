@@ -207,23 +207,36 @@ End Book_1_5.
 Section Book_1_6.
   Definition Book_1_6_prod (A B : Type) := forall x : Bool, if x then A else B.
 
-  Notation "'first' p" := (p true) (at level 0).
-  Notation "'second' p" := (p false) (at level 0).
-  Notation "'pair' a b" := (fun x => if x then a else b) (at level 0, a at next level).
+  Notation "'first' p" := (p true) (at level 200).
+  Notation "'second' p" := (p false) (at level 200).
 
-  Variables (A B : Type) (a : A) (b : B).
-  Check (pair a b) : Book_1_6_prod A B.
+  Definition pair {A B} (a : A) (b : B) : Book_1_6_prod A B.
+  Proof.
+    intro x.
+    by case x.
+  Defined.
 
-  Definition Book_1_6_ind (A B : Type) (C : Book_1_6_prod A B -> Type) (f : forall a b, C (pair a b))
-    : forall x : Book_1_6_prod A B, C x := fun x => f (x true) (x false).
+  Definition Book_1_6_eta {A B} {x : Book_1_6_prod A B}: pair (first x) (second x) == x
+    := fun b =>
+         match b with
+           | true => 1
+           | false => 1
+         end.
 
-  Theorem inl_red {A B : Type} {C : Book_1_5_sum A B -> Type} f g { a : A }
-  : Book_1_5_ind A B C f g (inl a) = f a.
-  Proof. reflexivity. Defined.
+  Definition Book_1_6_ind `{Funext} {A B} (C : Book_1_6_prod A B -> Type) (f : forall a b, C (pair a b))
+    : forall x : Book_1_6_prod A B, C x.
+  Proof.
+    intro x.
+    assert (pair (first x) (second x) = x) by apply path_forall, Book_1_6_eta.
+    destruct X.
+    exact (f (first x) (second x)).
+  Defined.
 
-  Theorem inr_red {A B : Type} {C : Book_1_5_sum A B -> Type} f g { b : B }
-  : Book_1_5_ind A B C f g (inr b) = g b.
-  Proof. reflexivity. Defined.
+  Theorem pair_red `{Funext} {A B : Type} {C : Book_1_6_prod A B -> Type} f (a : A)(b : B)
+    : Book_1_6_ind C f (pair a b) = f a b.
+  Proof.
+    unfold Book_1_6_ind. simpl.
+  Abort.
 End Book_1_5.
 
 
