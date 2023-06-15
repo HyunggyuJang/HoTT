@@ -1204,13 +1204,16 @@ Proof.
     - apply F0.
     - apply path_forall.
       intro d.
-      rewrite transport_forall.
-      rewrite transport_forall_constant.
-      admit.
+      rewrite transport_arrow.
+      rewrite transport_path_universe.
+      rewrite transport_path_universe_V_uncurried.
+      simpl.
+      rewrite Fs.
+      by rewrite (happly p0).
   }
-  exists X.
+  exists X0.
   apply IsHProp_IsNHinit.
-Abort.
+Qed.
 
 (* ================================================== thm:nat-hinitial *)
 (** Theorem 5.4.5 *)
