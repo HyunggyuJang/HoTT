@@ -811,6 +811,10 @@ Definition NHom (N M : NAlg) :=
 
 Definition IsNHinit (I : NAlg) := forall C : NAlg, Contr (NHom I C).
 Definition NHinit := { I : NAlg & IsNHinit I }.
+Lemma IsHProp_IsNHinit `{Funext} (I : NAlg): IsHProp (IsNHinit I).
+Proof.
+  apply istrunc_forall.
+Qed.
 
 (* ================================================== thm:ishprop-n-hinit *)
 (** Theorem 5.4.4 *)
@@ -827,38 +831,42 @@ Notation "g 'o' f" := (NHom_compose f g).
 
 Definition Id_NHom {M} : NHom M M := (idmap; (1, fun _ => 1))%path.
 
-(* Lemma NAlg_equiv_path {I J} (f : NHom I J) (g : NHom J I) (issect : g o f = Id_NHom) (isretr : f o g = Id_NHom): *)
-(*   I = J. *)
-(* Proof. *)
-(*   destruct I as [C [c0 c_s]], J as [D [d0 d_s]]. *)
-(*   destruct f as [f [F0 F_s]], g as [g [G0 G_s]]. *)
-(*   apply equiv_path_sigma in issect, isretr. *)
-(*   simpl in issect, isretr. *)
-(*   destruct issect as [issect SectHom], isretr as [isretr RetrHom]. *)
-(*   assert (C <~> D) as C_equiv_D. *)
-(*   { apply (equiv_adjointify f g). *)
-(*     - exact (happly isretr). *)
-(*     - exact (happly issect). *)
-(*   } *)
-(*   apply equiv_path_sigma. *)
-(*   pose (C_eq_D := path_universe_uncurried C_equiv_D). *)
-(*   apply equiv_path_prod. *)
-
-(*+ Cannot form I <~> J, as equiv is not defined on NAlg, but Type *)
-
 Theorem IsHProp_NHinit `{Univalence}: IsHProp NHinit.
 Proof.
   apply hprop_allpath.
-  intros [I I_is_NHinit] [J J_is_NHinit].
+  intros [[C [c0 cs]] I_is_NHinit] [[D [d0 ds]] J_is_NHinit].
   apply equiv_path_sigma; simpl.
-  destruct (I_is_NHinit J) as [f Fcontr].
-  destruct (J_is_NHinit I) as [g Gcontr].
-  destruct (I_is_NHinit I) as [I_id IdContr].
-  set (gf_eq_id := (IdContr (g o f))^ @ (IdContr Id_NHom)).
-  assert (p : I = J).
-  - apply equiv_path_sigma.
-    assert (I.1 = J.1).
-    + apply path_universe_uncurried.
+  destruct (I_is_NHinit (D; (d0, ds))) as [f Fcontr].
+  destruct (J_is_NHinit (C; (c0, cs))) as [g Gcontr].
+  destruct (I_is_NHinit (C; (c0, cs))) as [I_id IdContr].
+  destruct (J_is_NHinit (D; (d0, ds))) as [I_id' IdContr'].
+  pose (gf_eq_id := (IdContr (g o f))^ @ (IdContr Id_NHom)).
+  pose (fg_eq_id := (IdContr' (f o g))^ @ (IdContr' Id_NHom)).
+  pose (ap pr1 gf_eq_id).
+  pose (ap pr1 fg_eq_id).
+  simpl in p, p0.
+  destruct f as [f [F0 Fs]].
+  destruct g as [g [G0 Gs]].
+  set (equiv_adjointify f g (happly p0) (happly p)).
+  set (path_universe_uncurried e).
+  assert ((C; (c0, cs)) = (D; (d0, ds)) :> NAlg).
+  {
+    apply equiv_path_sigma; simpl.
+    exists p1.
+    rewrite transport_prod.
+    simpl.
+    unfold p1.
+    rewrite transport_path_universe.
+    apply path_prod; simpl.
+    - apply F0.
+    - apply path_forall.
+      intro d.
+      rewrite transport_forall.
+      rewrite transport_forall_constant.
+      admit.
+  }
+  exists X.
+  apply IsHProp_IsNHinit.
 Abort.
 
 (* ================================================== thm:nat-hinitial *)
