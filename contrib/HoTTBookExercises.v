@@ -246,6 +246,53 @@ End Book_1_6.
 (** Exercise 1.7 *)
 
 
+Section Book_1_7.
+  Definition Book_1_7_path_ind {A : Type} (C : forall x y : A, x = y -> Type) (c : forall x, C x x 1)
+    : forall x y (p : x = y), C x y p.
+  Proof.
+    intros x y p.
+    by destruct p.
+  Defined.
+
+  Definition Book_1_7_contr_basedpaths {X : Type} (x : X) : Contr {y : X & x = y}.
+  Proof.
+    exists (x; 1).
+    intros [y p].
+    revert x y p.
+    apply Book_1_7_path_ind.
+    done.
+  Defined.
+
+  Definition Book_1_7_transport {A : Type} (P : A -> Type) {x y : A} (p : x = y) (u : P x) : P y.
+  Proof.
+    refine (Book_1_7_path_ind (fun x y p => P x -> P y) _ x y p u).
+    done.
+  Defined.
+
+  Definition Book_1_7_trans {A : Type} {x y z : A}: x = y -> x = z -> y = z.
+  Proof.
+    revert x y.
+    refine (Book_1_7_path_ind _ _).
+    done.
+  Defined.
+
+  Definition Book_1_7_based_path_ind
+    {A : Type} (a : A) (C : forall x, a = x -> Type) (c : C a 1): forall x p, C x p.
+  Proof.
+    intros x p.
+    destruct (Book_1_7_contr_basedpaths a).
+    assert ((a; 1) = (x; p)) by exact (Book_1_7_trans (contr (a; 1)) (contr (x; p))).
+    change (C (x; p).1 (x; p).2).
+    exact (Book_1_7_transport (fun w => C w.1 w.2) X c).
+  Defined.
+
+  Theorem Book_1_7_red {A : Type} (a : A) (C : forall x, a = x -> Type) (c : C a 1)
+    : Book_1_7_based_path_ind a C c a 1 = c.
+  Proof.
+    reflexivity.
+  Qed.
+End Book_1_7.
+
 
 (* ================================================== ex:nat-semiring *)
 (** Exercise 1.8 *)
@@ -256,27 +303,90 @@ Fixpoint rec_nat' (C : Type) c0 cs (n : nat) : C :=
   | S m => cs m (rec_nat' C c0 cs m)
   end.
 
+Definition iter' (C : Type) c0 cs (n : nat) : C :=
+  rec_nat' C c0 (fun _ c => cs c) n.
+
 Definition add : nat -> nat -> nat :=
-  rec_nat' (nat -> nat) (fun m => m) (fun n g m => (S (g m))).
+  iter' (nat -> nat) (fun m => m) (fun g m => (S (g m))).
 
 Definition mult : nat -> nat -> nat  :=
-  rec_nat' (nat -> nat) (fun m => 0) (fun n g m => add m (g m)).
+  iter' (nat -> nat) (fun m => 0) (fun g m => add m (g m)).
 
 (* rec_nat' gives back a function with the wrong argument order, so we flip the
    order of the arguments p and q *)
-Definition exp : nat -> nat -> nat  :=
-  fun p q => (rec_nat' (nat -> nat) (fun m => (S 0)) (fun n g m => mult m (g m))) q p.
+Definition exp : nat -> nat -> nat :=
+  fun p q => iter' (nat -> nat) (fun m => S 0) (fun g m => mult m (g m)) q p.
 
 Example add_example: add 32 17 = 49. Proof. reflexivity. Defined.
 Example mult_example: mult 20 5 = 100. Proof. reflexivity. Defined.
 Example exp_example: exp 2 10 = 1024. Proof. reflexivity. Defined.
 
-(* To do: proof that these form a semiring *)
+Require HoTT.Classes.interfaces.canonical_names.
+Module cn := HoTT.Classes.interfaces.canonical_names.
+
+Local Instance plus_0_r: cn.RightIdentity add O.
+Proof.
+  intro n.
+  induction n; [done|].
+  refine (match IHn^ in (_ = n') return (n'.+1 = n.+1)%nat with 1 => _ end).
+  reflexivity.
+Qed.
+
+#[local] Instance plus_0_l: cn.LeftIdentity add O.
+Proof.
+  done.
+Qed.
+
+Local Instance mult_1_l: cn.LeftIdentity mult 1%nat.
+Proof.
+  apply plus_0_r.
+Qed.
+
+Local Instance mult_1_r: cn.RightIdentity mult 1%nat.
+Proof.
+  intro n.
+  induction n; [done|].
+  refine (match IHn^ in (_ = n') return (n'.+1 = n.+1)%nat with 1 => _ end).
+  done.
+Qed.
+
+Local Instance plus_assoc: cn.Associative add.
+Proof.
+  intros x y z.
+  induction x; [done|].
+  refine (match IHx^ in (_ = n) return (n.+1 = (add (add x y) z).+1)%nat with 1 => _ end).
+  done.
+Qed.
+
+Local Instance plus_mult_distr_r : cn.RightDistribute mult add.
+Proof.
+  intros x y z.
+  induction x; [done|].
+  change (add z (mult (add x y) z) = add (add z (mult x z)) (mult y z)).
+  rewrite <-plus_assoc.
+  by rewrite IHx.
+Qed.
+
+Local Instance mult_assoc: cn.Associative mult.
+Proof.
+  intros x y z.
+  induction x; [done|].
+  change (add (mult y z) (mult x (mult y z)) = mult (add y (mult x y)) z).
+  rewrite plus_mult_distr_r.
+  by rewrite IHx.
+Qed.
 
 (* ================================================== ex:fin *)
 (** Exercise 1.9 *)
 
+Require Import HoTT.Spaces.Finite.
 
+Definition Book_1_9_Fin := Fin.
+
+Definition Book_1_9_fmax: forall n, Book_1_9_Fin n.+1 := fun n => @fin_last n.
+
+Theorem Book_1_9_fmax_max: forall n, fin_to_nat (Book_1_9_fmax n) = n.
+Proof. reflexivity. Qed.
 
 (* ================================================== ex:ackermann *)
 (** Exercise 1.10 *)
