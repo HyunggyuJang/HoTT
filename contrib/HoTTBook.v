@@ -63,6 +63,7 @@ From HoTT Require HIT.V HIT.Flattening Homotopy.WhiteheadsPrinciple.
 From HoTT Require Categories.
 From HoTT Require Metatheory.IntervalImpliesFunext Metatheory.UnivalenceImpliesFunext.
 From HoTT Require Classes.theory.premetric.
+From HoTT Require Import Tactics.
 
 
 (* END OF PREAMBLE *)
