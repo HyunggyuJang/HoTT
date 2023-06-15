@@ -113,8 +113,8 @@ Section Eckmann.
     destruct q.
     by rewrite !concat_1p.
   Defined.
-  Notation "a @^l b" := (whisker_l a b)%path : path_scope.
-  Notation "a @^r b" := (whisker_r a b)%path : path_scope.
+  Notation "a @^l b" := (whisker_l a b)%path (at level 20) : path_scope.
+  Notation "a @^r b" := (whisker_r a b)%path (at level 20) : path_scope.
   Definition star {A : Type} {a b c : A}
     {p q : a = b} {r s : b = c}
     (α : p = q) (ϐ : r = s):
@@ -500,7 +500,7 @@ Definition Book_2_12_5 := @HoTT.Types.Sum.equiv_path_sum.
 (* ================================================== thm:path-nat *)
 (** Theorem 2.13.1 *)
 
-Definition Book_2_13_1 := @HoTT.Spaces.Nat.equiv_path_nat.
+Definition Book_2_13_1 := @HoTT.Spaces.Nat.Core.equiv_path_nat.
 
 (* ================================================== thm:prod-ump *)
 (** Theorem 2.15.2 *)
@@ -536,7 +536,7 @@ Definition Book_3_1_3 := @HoTT.Types.Empty.hprop_Empty.
 (* ================================================== thm:nat-set *)
 (** Example 3.1.4 *)
 
-Definition Book_3_1_4 := @HoTT.Spaces.Nat.hset_nat.
+Definition Book_3_1_4 := @HoTT.Spaces.Nat.Core.hset_nat.
 
 (* ================================================== thm:isset-prod *)
 (** Example 3.1.5 *)
