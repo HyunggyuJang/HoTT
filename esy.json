@@ -15,7 +15,7 @@
     },
     "resolutions": {
         "coq-hott": {
-            "source": "HyunggyuJang/HoTT:coq-hott.opam#832aef3e6fff0f5b953ed170522e1a3d6288a4bb",
+            "source": "HyunggyuJang/HoTT:coq-hott.opam#974d0883131bae894a3311c18a01d0646a72d3f5",
             "override": {
                 "dependencies": {
                     "@opam/coq": "*"
