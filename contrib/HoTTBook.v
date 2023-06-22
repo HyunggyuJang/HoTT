@@ -1129,12 +1129,33 @@ Definition Book_4_9_5 := @HoTT.Metatheory.FunextVarieties.WeakFunext_implies_Fun
 (* ================================================== thm:nat-uniq *)
 (** Theorem 5.1.1 *)
 
-
+Definition Book_5_1_1 {E : nat -> Type} (f g: forall n, E n) (e0 : E 0%nat) (es : forall n, E n -> E (S n))
+  : f 0%nat = e0
+    -> g 0%nat = e0
+    -> (forall n, f (S n) = es n (f n))
+    -> (forall n, g (S n) = es n (g n))
+    -> forall n, f n = g n.
+Proof.
+  intros F0 G0 Fs Gs.
+  induction n.
+  - exact (F0 @ G0^).
+  - exact (Fs n @ ap (es n) IHn @ (Gs n)^).
+Defined.
 
 (* ================================================== thm:w-uniq *)
 (** Theorem 5.3.1 *)
 
-
+Definition Book_5_3_1 {A : Type} {B : A -> Type} `{Funext} {E : W A B -> Type}
+  (f g : forall w, E w)
+  (eW : forall a wargs, (forall b, E (wargs b)) -> E (w_sup A B a wargs))
+  : (forall a wargs, f (w_sup A B a wargs) = eW a wargs (f o wargs))
+    -> (forall a wargs, g (w_sup A B a wargs) = eW a wargs (g o wargs))
+    -> forall w, f w = g w.
+Proof.
+  intros sf sg.
+  induction w as [a wargs IHw].
+  exact (sf a wargs @ ap (eW a wargs) (path_forall _ _ IHw) @ (sg a wargs)^).
+Defined.
 
 (* ================================================== defn:nalg *)
 (** Definition 5.4.1 *)
@@ -1219,6 +1240,45 @@ Qed.
 (* ================================================== thm:nat-hinitial *)
 (** Theorem 5.4.5 *)
 
+Theorem Nat_IsNHinit `{Funext}:  IsNHinit (nat; (0, S)%nat).
+Proof.
+  intros [C [c0 c_s]].
+  set (f := nat_rec (fun _ => C) c0 (fun _ => c_s)).
+  set (F0 := 1%path : (f 0)%nat = c0).
+  set (Fs := (fun _ => 1%path) : forall n, f (n.+1)%nat = c_s (f n)).
+  exists (f; (F0, Fs)).
+  intros [g [G0 Gs]].
+  set (Huniq := (path_forall _ _ (Book_5_1_1 f g c0 (fun _ => c_s) F0 G0 Fs Gs))).
+  unfold Book_5_1_1 in Huniq.
+  apply path_sigma with (p := Huniq); simpl.
+  rewrite transport_prod; simpl.
+  apply path_prod; simpl.
+  - rewrite transport_paths_Fl.
+    rewrite (ap_apply_lD Huniq).
+    rewrite apD10_path_forall; simpl.
+    apply moveR_Vp.
+    rewrite concat_pp_p.
+    rewrite concat_Vp.
+    by rewrite concat_p1.
+  - apply path_forall.
+    intro n.
+    rewrite transport_forall_constant.
+    rewrite transport_paths_FlFr.
+    rewrite concat_p1.
+    rewrite ap_compose.
+    rewrite !(ap_apply_lD Huniq).
+    rewrite !apD10_path_forall; simpl.
+    apply moveR_Vp.
+    rewrite concat_pp_p.
+    rewrite concat_Vp.
+    rewrite concat_p1.
+    unfold Fs.
+    symmetry.
+    by rewrite concat_1p.
+Qed.
+
+Section Nat_Structure.
+(* Bonus, building abstractions around natural number; good connection to section 5.5 *)
 Check nat_rec.
 
 Theorem nat_beta_0: forall (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat),
@@ -1226,22 +1286,22 @@ Theorem nat_beta_0: forall (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C 
 Proof. by reflexivity. Qed.
 
 Theorem nat_beta_s: forall (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat)
-  (n : nat), nat_rect C c_0 c_s (S n)%nat = c_s n (nat_rect C c_0 c_s n).
+                      (n : nat), nat_rect C c_0 c_s (S n)%nat = c_s n (nat_rect C c_0 c_s n).
 Proof. by reflexivity. Qed.
 
 (* First-order eta rule. *)
 Definition nat_eta_1 (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
   forall (x : nat), h x = nat_rect C c_0 c_s x
   := nat_rect (fun x => h x = nat_rect C c_0 c_s x)
-             (p_0 @ (nat_beta_0 C c_0 c_s)^)
-             (fun n hyp => p_s n @ (ap (c_s n) hyp) @ (nat_beta_s C c_0 c_s n)^).
+       (p_0 @ (nat_beta_0 C c_0 c_s)^)
+       (fun n hyp => p_s n @ (ap (c_s n) hyp) @ (nat_beta_s C c_0 c_s n)^).
 
 (* Second-order eta rules. *)
 Definition nat_eta_2_0 (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
   nat_eta_1 C c_0 c_s h p_0 p_s 0%nat @ nat_beta_0 C c_0 c_s = p_0.
 Proof.
-apply moveR_pM.
-apply nat_beta_0 with (C := fun x => h x = nat_rect C c_0 c_s x).
+  apply moveR_pM.
+  apply nat_beta_0 with (C := fun x => h x = nat_rect C c_0 c_s x).
 Defined.
 
 Definition nat_eta_2_s (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n -> C (S n)%nat) (h : forall x, C x) (p_0 : h 0%nat = c_0) (p_s : forall n, h (S n)%nat = c_s n (h n)) :
@@ -1249,9 +1309,9 @@ Definition nat_eta_2_s (C : nat -> Type) (c_0 : C 0%nat) (c_s : forall n, C n ->
     nat_eta_1 C c_0 c_s h p_0 p_s (S n)%nat @ nat_beta_s C c_0 c_s n
     = p_s n @ ap (c_s n) (nat_eta_1 C c_0 c_s h p_0 p_s n).
 Proof.
-intro.
-apply moveR_pM.
-apply nat_beta_s with (C := fun x => h x = nat_rect C c_0 c_s x).
+  intro.
+  apply moveR_pM.
+  apply nat_beta_s with (C := fun x => h x = nat_rect C c_0 c_s x).
 Defined.
 
 Definition nat_rec_simp (C : Type) (c_0 : C) (c_s : C -> C) : forall (n : nat), C
@@ -1304,8 +1364,8 @@ Proof.
   1: apply concat_1p.
   intro x; simpl.
   by rewrite concat_1p, concat_p1.
-
 Qed.
+
 Lemma nat_cell_to_prop_eq `{Funext}: NatCell h1 h2 -> h1 = h2.
 Proof.
   intros [p [q q']].
@@ -1323,7 +1383,7 @@ Proof.
 Qed.
 End NatCells.
 
-Theorem Nat_IsNHinit `{Funext}:  IsNHinit (nat; (0, S)%nat).
+Theorem Nat_IsNHinit_NatCells `{Funext}:  IsNHinit (nat; (0, S)%nat).
 Proof.
   intros [C [c0 c_s]].
   exists (nat_rec_simp C c0 c_s; (nat_beta_simp_0 C c0 c_s, nat_beta_simp_s C c0 c_s)).
@@ -1337,6 +1397,7 @@ Proof.
   revert x.
   apply (nat_eta_simp_2_s C c0 c_s g G0 G_s).
 Qed.
+End Nat_Structure.
 
 (* ================================================== thm:w-hinit *)
 (** Theorem 5.4.7 *)
@@ -1347,23 +1408,67 @@ Variable (A : Type) (B : A -> Type).
 
 Definition polynomial X := { x : A | B x -> X }.
 
-Record WAlg {C : Type} : Type := {
-    s_W : polynomial C -> C
-}.
+Definition WAlg := { C | forall a, (B a -> C) -> C }.
+Definition WHom (N M : WAlg) :=
+  match N, M with
+    (C; sC), (D; sD) =>
+      { f: C -> D | forall a h, f (sC a h) = sD a (f o h)%function }
+  end.
 
-Check @WAlg A : Type.
+Lemma poly_in {X} : (forall a, (B a -> X) -> X) -> (polynomial X -> X).
+intros H [a H'].
+by apply (H a).
+Defined.
 
-Definition issig_WAlg {C : Type}
-  : _ <~> @WAlg C := ltac:(issig).
+Lemma poly_out {X} : (polynomial X -> X) -> (forall a, (B a -> X) -> X).
+intros H a H'.
+apply H. by exists a.
+Defined.
 
-Definition WHom {C D : Type} (N : @WAlg C) (M : @WAlg D) :=
-  { f: C -> D | forall a h, f (s_W N (a; h)) = s_W M (a; (f o h)%function) }.
+Definition IsWHinit (I : WAlg) := forall C : WAlg, Contr (WHom I C).
+Definition WHinit := { I : WAlg & IsWHinit I }.
 
-Definition IsWHinit {C : Type} (I : @WAlg C) := forall {D} (N : @WAlg D), Contr (WHom I N).
-Definition WHinit {C : Type} := { I : @WAlg C & IsWHinit I }.
+Theorem W_IsWHinit `{Funext}: IsWHinit (W A B; w_sup A B).
+Proof.
+  intros [C sC].
+  set (f := W_rec A B (fun _ => C) (fun a wargs => fun cargs => sC a cargs) : W A B -> C).
+  set (sf := (fun a h => 1%path) : forall a h, f ((w_sup A B) a h) = sC a (f o h)%function).
+  simpl in f.
+  exists (f; sf).
+  intros [g sg].
+  set (Huniq' := (Book_5_3_1 f g
+                    (fun (a : A) (wargs : B a -> W A B)
+                       (cargs : forall b : B a, (fun _ : W A B => C) (wargs b)) =>
+               sC a cargs) sf sg)).
+  set (Huniq := (path_forall _ _ Huniq')).
+  apply path_sigma with (p := Huniq); simpl.
+  apply path_forall; intro a; rewrite transport_forall_constant.
+  apply path_forall; intro h; rewrite transport_forall_constant.
+  rewrite transport_paths_FlFr.
+  rewrite ap_apply_l.
+  rewrite concat_pp_p.
+  apply moveR_Vp.
+  rewrite concat_1p.
+  rewrite ap_compose.
+  rewrite ap10_path_forall; simpl.
+  rewrite concat_pp_p.
+  rewrite concat_Vp.
+  rewrite concat_p1.
+  symmetry.
+  rewrite ap_compose.
+  rewrite ap_idmap.
+  rewrite concat_1p.
+  apply (ap (ap (sC a))).
+  rewrite ap_lambdaD.
+  apply ap.
+  apply path_forall.
+  intro b.
+  rewrite ap_apply_l.
+  by rewrite ap10_path_forall.
+Qed.
 
-Check W_rect.
-
+Section W_Structure.
+(* Bonus, building abstractions around Wtype; good connection to section 5.5 *)
 Theorem W_beta_s :
   forall (C : W A B -> Type)
     (sC : forall a f, (forall b : B a, C (f b)) -> C (w_sup A B a f))
@@ -1425,16 +1530,6 @@ Definition W_eta_simp_2_s `{Funext}
         (path_forall _ _ (fun b : B a => W_eta_1 (fun _ => C) (fun a _ => sC a) h p_sC (f b)))
   := W_eta_2_s (fun _ => C) (fun a _ => sC a) h p_sC.
 
-Lemma poly_out {X} : (polynomial X -> X) -> (forall a, (B a -> X) -> X).
-intros H a H'.
-apply H. by exists a.
-Defined.
-
-Lemma poly_in {X} : (forall a, (B a -> X) -> X) -> (polynomial X -> X).
-intros H [a H'].
-by apply (H a).
-Defined.
-
 Lemma poly_equiv `{Funext} {X} : (forall a, (B a -> X) -> X) <~> (polynomial X -> X).
 by apply equiv_adjointify with (f := poly_in) (g := poly_out);
   intro x; unfold poly_out, poly_in; [funext ? | funext ? ?].
@@ -1442,28 +1537,28 @@ Defined.
 
 Definition WCell
   `{Funext}
-  {C : Type} {s_C : polynomial C -> C}
-  {D : Type} {s_D : polynomial D -> D}
-  (h1 h2 : WHom (issig_WAlg s_C) (issig_WAlg s_D)) : Type.
+  {C : Type} {sC : forall a, (B a -> C) -> C}
+  {D : Type} {sD : forall a, (B a -> D) -> D}
+  (h1 h2 : WHom (C; sC) (D; sD)) : Type.
 Proof.
   destruct h1 as [h1 H1], h2 as [h2 H2].
   refine (
       { p : forall (x : C), h1 x = h2 x
-      | forall a f, p (poly_out s_C a f) @ H2 a f = H1 a f @ _ }
+      | forall a f, p (sC a f) @ H2 a f = H1 a f @ _ }
     ).
-  refine (ap (poly_out s_D a) _).
+  refine (ap (sD a) _).
   apply path_forall.
   by intro x.
 Defined.
 
 Section WCells.
 Variable C : Type.
-Variable s_C : polynomial C -> C.
+Variable sC : forall a, (B a -> C) -> C.
 
 Variable D : Type.
-Variable s_D : polynomial D -> D.
+Variable sD : forall a, (B a -> D) -> D.
 
-Variable h1 h2 : WHom (issig_WAlg s_C) (issig_WAlg s_D).
+Variable h1 h2 : WHom (C; sC) (D; sD).
 
 Context `{Funext}.
 
@@ -1481,15 +1576,17 @@ Proof.
   intros [p q].
   set (p' := path_forall h1.1 h2.1 p).
   apply path_sigma with (p := p').
-  unfold poly_in, p'. simpl.
+  unfold p'. simpl.
   apply path_forall. intro a. rewrite transport_forall_constant.
   apply path_forall. intro f. rewrite transport_forall_constant.
-  rewrite (path_forall_recr_beta _ _ (poly_out s_C a f) (fun g d => d = poly_out s_D a (fun b => g (f b)))).
-  rewrite transport_paths_l. rewrite transport_paths_Fr. rewrite concat_pp_p.
+  rewrite transport_paths_FlFr.
+  rewrite (ap_apply_lD (path_forall h1.1 h2.1 p)).
+  rewrite apD10_path_forall; simpl.
+  rewrite concat_pp_p.
   apply moveR_Vp. apply inverse.
   assert (rw :
-      ap (fun y : C -> D => poly_out s_D a (fun b : B a => y (f b))) (path_forall h1.1 h2.1 p)
-      = ap (poly_out s_D a)
+      ap (fun y : C -> D => sD a (fun b : B a => y (f b))) (path_forall h1.1 h2.1 p)
+      = ap (sD a)
           (path_forall
              (fun x : B a => h1.1 (f x))
              (fun x : B a => h2.1 (f x))
@@ -1497,10 +1594,9 @@ Proof.
     ).
   {
     clear.
-    rewrite ap_apply_Fr.
-    apply (ap (ap (poly_out s_D a))).
-    rewrite ap_lambda.
-    unfold path_arrow.
+    rewrite ap_compose.
+    apply (ap (ap (sD a))).
+    rewrite ap_lambdaD.
     apply ap.
     apply path_forall.
     intro b.
@@ -1513,22 +1609,19 @@ Qed.
 
 End WCells.
 
-Check w_sup.
-
-Theorem W_IsWHinit `{H0 : Funext}: IsWHinit (issig_WAlg (poly_in (w_sup A B))).
+Theorem W_IsWHinit_WCells `{H0 : Funext}: IsWHinit (W A B; w_sup A B).
 Proof.
-  intros C [s_C].
-  set (sC := poly_out s_C).
+  intros [C sC].
   exists (W_rec_simp C sC; W_beta_simp_s C sC).
-  intros [g p_sC].
+  intros [g sg].
   apply W_cell_to_prop_eq with (H0 := H0).
-  split with (fun w => (W_eta_simp_1 C sC g p_sC w)^).
+  split with (fun w => (W_eta_simp_1 C sC g sg w)^).
   intros a f.
   apply moveR_Vp. rewrite concat_p_pp. rewrite path_forall_V, ap_V. apply moveL_pV, inverse.
   revert a f.
-  apply (W_eta_simp_2_s C sC g p_sC).
+  apply (W_eta_simp_2_s C sC g sg).
 Qed.
-
+End W_Structure.
 End W_Algebra.
 
 
